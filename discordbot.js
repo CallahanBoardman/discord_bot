@@ -1,5 +1,6 @@
 const { clientId, guildId, token } = require('./config.json');
 const path = require('node:path');
+const schedule = require('node:schedule');
 const fs = require('node:fs');
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 const client = new Client({ intents: 
@@ -62,4 +63,10 @@ client.on('messageCreate', msg => {
      }
     });
 
+
+const schedule_rule = new schedule.RecurrenceRule();
+schedule_rule.minute = 1;
+schedule.scheduleJob(schedule_rule, () => {
+	
+})
     
