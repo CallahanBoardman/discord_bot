@@ -1,7 +1,8 @@
 const { clientId, guildId, token } = require('./config.json');
 const path = require('node:path');
-const schedule = require('node:schedule');
 const fs = require('node:fs');
+const schedule = require('node-schedule')
+const { globalrepo } = require('./global-repo')
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 const client = new Client({ intents: 
     [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
@@ -65,8 +66,29 @@ client.on('messageCreate', msg => {
 
 
 const schedule_rule = new schedule.RecurrenceRule();
-schedule_rule.minute = 1;
-schedule.scheduleJob(schedule_rule, () => {
-	
-})
+schedule_rule.minute = new schedule.Range(0, 59, 1);
+schedule.scheduleJob(schedule_rule, async () => {
+	let reminderMap = globalrepo.reminderMap;
+	let remindersToDelete = [];
+		for(const [id, reminder] of reminderMap) {
+			let reminderDate = new Date(reminder.ReminderDate); 
+			let reminderTime = reminderDate.getTime();
+
+			if(reminderTime <= Date.now()) {
+				console.log(reminder.UsersList);
+				for(const userID of reminder.UsersList) {
+				const user = await client.users.fetch(userID).catch((e) => console.log(e));
+				if (!user) {
+					console.error('Invalid user');
+					continue;
+				}
+				await user.send(reminder.ReminderMessage).catch(() => {
+    				console.error("User has DMs closed or has no mutual servers with the bot:(");
+				});
+				}
+				remindersToDelete.push(id);
+			}
+		}
+	globalrepo.removeFromList(remindersToDelete);
+});
     
