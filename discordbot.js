@@ -1,12 +1,16 @@
 const { clientId, guildId, token } = require('./config.json');
 const path = require('node:path');
 const fs = require('node:fs');
+const Canvas = require('@napi-rs/canvas');
+const { GlobalFonts } = require('@napi-rs/canvas');
 const schedule = require('node-schedule')
 const { globalrepo } = require('./global-repo')
-const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
+const { request } = require('undici');
+const { AttachmentBuilder, Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 const client = new Client({ intents: 
     [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
-
+	
+GlobalFonts.registerFromPath(require('@canvas-fonts/helveticaneue'), 'Yakuza Sans')
 client.on('ready', () => {
  console.log(`Logged in as ${client.user.tag}!`);
 });
@@ -57,10 +61,28 @@ client.on(Events.InteractionCreate, async interaction => {
 
 client.login(token);
 
-client.on('messageCreate', msg => {
+client.on('messageCreate', async msg => {
     // You can view the msg object here with console.log(msg)
      if (msg.content === 'Hello') {
-       msg.author.send(`冰淇淋 ${msg.author.username}`);
+		const canvas = Canvas.createCanvas(600, 800);
+		const context = canvas.getContext('2d');
+
+		const background = await Canvas.loadImage(`./assets/Front.png`);
+		// Select the font size and type from one of the natively available fonts
+		context.font = '100px Comic Sans MS';
+
+		
+		// Select the style that will be used to fill the text in
+		context.fillStyle = '#ffffff';
+
+		context.fillText('Fuck', 100, 100);
+		// This uses the canvas dimensions to stretch the image onto the entire canvas
+		context.drawImage(background, 0, 0, canvas.width, canvas.height);
+
+		// Use the helpful Attachment class structure to process the file for you
+		const attachment = new AttachmentBuilder(await canvas.encode('png'), { name: 'profile-image.png' });
+
+		msg.reply({ files: [attachment] });
      }
     });
 

@@ -11,7 +11,9 @@ class GlobalRepo {
 
     addToMap (jsonData) {
         this.reminderMap.set(this.id, jsonData.toJSON())
+        console.log(this.reminderMap);
         this.updateMap()
+        this.id++;
     }
 
     updateMap() {
@@ -28,8 +30,6 @@ class GlobalRepo {
     }
 
     removeFromList(dataToDelete){
-        
-        console.log(this.reminderMap); 
         for (let id of dataToDelete) {
             this.reminderMap.delete(id)
         }

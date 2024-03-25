@@ -12,7 +12,7 @@ Date.prototype.addHours = function(h) {
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('reminder')
-		.setDescription('Reminds a person .')
+		.setDescription('Reminds a person.')
 		.addNumberOption(option => 
 			option
 			.setName('date')
