@@ -10,7 +10,6 @@ const { AttachmentBuilder, Client, Collection, Events, GatewayIntentBits } = req
 const client = new Client({ intents: 
     [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 	
-GlobalFonts.registerFromPath(require('@canvas-fonts/helveticaneue'), 'Yakuza Sans')
 client.on('ready', () => {
  console.log(`Logged in as ${client.user.tag}!`);
 });
