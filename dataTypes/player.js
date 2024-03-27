@@ -5,3 +5,5 @@ class Player {
         this.id;
     }
 }
+
+module.exports = Player
