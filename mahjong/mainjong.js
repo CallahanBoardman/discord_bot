@@ -12,7 +12,8 @@ class MahjongTheGame {
         this.players = players;
         this.drawPile = [];
         this.discardPile = [];
-        this.tileOrder = Object.values(TileTypes)
+        this.tileOrder = Object.values(TileTypes);
+        this.whosTurn = 0;
     }
 
     gameSetup() {
@@ -55,9 +56,10 @@ class MahjongTheGame {
             
         } else if(stealType == 'Ron') {
 
-        } else {
-            return false;
+        } else if(stealType == 'Kan') {
+            
         }
+        return false;
     }
 
     isValidChi(tile1, tile2, tile3) {
