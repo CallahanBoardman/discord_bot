@@ -1,5 +1,6 @@
 const MahjongTile = require('../dataTypes/mahjong_tile');
 const TileTypes = require('../dataTypes/tile_types');
+
 function generateTileset() {
     const tileList = []
 
