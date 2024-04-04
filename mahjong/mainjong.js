@@ -63,9 +63,26 @@ class MahjongTheGame {
         return false;
     }
 
+    isValidChi(tile1, tile2, tile3) {
+        if(tile1.value + 1 === tile2.value) {
+            if(tile2.value + 1 === tile3.value) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    isValidPon(tile1, tile2, tile3) {
+        if(tile1.value === tile2.value) {
+            if(tile2.value === tile3.value){
+                return true
+            }
+        }
+        return false
+    }
+
     findSets(hand) {
         const subsets = hand.groupByType();
-        console.log("Subsets:" + subsets)
 
         const result_sets = new Map();
         result_sets.set(TileTypes.Bamboo, []);
@@ -74,13 +91,14 @@ class MahjongTheGame {
         
 
         for (const tile_type of result_sets.keys()) {
+            console.log(subsets[tile_type])
             result_sets.set(tile_type, this.findSetsInSubset(subsets[tile_type]))
         }
         console.log(result_sets);
         console.log("\nGot results: ")
         for (const tile_type of result_sets.keys()) {
             console.log(`For type ${tile_type}`)
-            for (result of result_sets.get(tile_type)) {
+            for (const result of result_sets.get(tile_type)) {
                 console.log(result)
             }
         }
@@ -94,23 +112,21 @@ class MahjongTheGame {
     for (let i = 0; i < subset.length - 2; i++) {
         for (let j = i + 1; j < subset.length - 1; j++) {
             console.log("Comparing indexes " + i + " with " + j + " and " + (j+1));
-            console.log(subset[i].value)
-            console.log(subset[j].value)
-            console.log(subset[j + 1].value)
-            console.log('Are they equal ' + (subset[i].value === subset[j].value === subset[j + 1].value))
-            console.log('are they ascending ' + ((subset[i].value+2) === (subset[j].value + 1) === subset[j + 1].value));
-            if ((subset[i].value === subset[j].value === subset[j + 1].value) || ((subset[i].value+2) === (subset[j].value + 1) === subset[j + 1].value)) {
+            if (this.isValidPon(subset[i], subset[j], subset[j + 1]) || this.isValidChi(subset[i], subset[j], subset[j+1])) {
                 const validCombo = [subset[i], subset[j], subset[j + 1]];
                 console.log("Its a valid combo!");
                 const subsubset = structuredClone(subset);
+                // console.log(subsubset);
+
                 subsubset.splice(j, 2);
                 subsubset.splice(i, 1);
-
+                // console.log(subsubset);
                 const possible_subsets = this.findSetsInSubset(subsubset.slice(i));
-                if (!possible_subsets) {
-                    results.push([validCombo])
+                if (possible_subsets.length === 0) {
+                    results.push([validCombo]);
                 }
-                for (possibility in possible_subsets) {
+
+                for (const possibility of possible_subsets) {
                     results.push([validCombo] + possibility)
                 }
             }
@@ -126,17 +142,17 @@ let player3 = new Player(new PlayerHand([]), null, 3);
 let player4 = new Player(new PlayerHand([]), null, 4);
 const testMahjong = new MahjongTheGame([player4]);
 
-testMahjong.gameSetup();
+// testMahjong.gameSetup();
 // console.log(player4.hand);
-testMahjong.discardTile(player4.hand, 5);
+// testMahjong.discardTile(player4.hand, 5);
 // console.log(player1.hand);
 // console.log(player2.hand);
 // console.log(player3.hand);
-console.log(player4.hand.tiles);
-testMahjong.findSets(player4.hand);
+// console.log(player4.hand.tiles);
+// testMahjong.findSets(player4.hand);
 // console.log(testMahjong.discardPile);
-const fakeHand = [
-    MahjongTile (
+const fakeHand = new PlayerHand([
+    new MahjongTile (
       'CHARACTER',
       1,
       '../assets/Man1',
@@ -144,7 +160,7 @@ const fakeHand = [
       false,
       false
     ),
-    MahjongTile (
+    new MahjongTile (
       'CHARACTER',
       4,
       '../assets/Man4',
@@ -152,7 +168,7 @@ const fakeHand = [
       false,
       false
     ),
-    MahjongTile (
+    new MahjongTile (
       'CHARACTER',
       4,
       '../assets/Man4',
@@ -160,7 +176,7 @@ const fakeHand = [
       false,
       false
     ),
-    MahjongTile (
+    new MahjongTile (
       'CHARACTER',
       4,
       '../assets/Man4',
@@ -168,7 +184,7 @@ const fakeHand = [
       false,
       false
     ),
-    MahjongTile (
+    new MahjongTile (
       'BAMBOO',
       3,
       '../assets/Sou3',
@@ -176,7 +192,7 @@ const fakeHand = [
       false,
       false
     ),
-    MahjongTile (
+    new MahjongTile (
       'BAMBOO',
       5,
       '../assets/Sou5-Dora',
@@ -184,7 +200,7 @@ const fakeHand = [
       false,
       true
     ),
-    MahjongTile (
+    new MahjongTile (
       'BAMBOO',
       7,
       '../assets/Sou7',
@@ -192,7 +208,15 @@ const fakeHand = [
       false,
       false
     ),
-    MahjongTile (
+    new  MahjongTile (
+        'COIN',
+        5,
+        '../assets/Pin5',
+        false,
+        false,
+        false
+      ),
+    new  MahjongTile (
       'COIN',
       6,
       '../assets/Pin6',
@@ -200,7 +224,7 @@ const fakeHand = [
       false,
       false
     ),
-    MahjongTile (
+    new MahjongTile (
       'COIN',
       7,
       '../assets/Pin7',
@@ -208,7 +232,7 @@ const fakeHand = [
       false,
       false
     ),
-    MahjongTile (
+    new MahjongTile (
       'COIN',
       8,
       '../assets/Pin8',
@@ -216,7 +240,7 @@ const fakeHand = [
       false,
       false
     ),
-    MahjongTile (
+    new MahjongTile (
       'WIND',
       11,
       '../assets/South',
@@ -224,7 +248,7 @@ const fakeHand = [
       true,
       false
     ),
-    MahjongTile (
+    new MahjongTile (
       'DRAGON',
       15,
       '../assets/Green',
@@ -232,7 +256,7 @@ const fakeHand = [
       true,
       false
     ),
-    MahjongTile (
+    new MahjongTile (
       'DRAGON',
       16,
       '../assets/White',
@@ -240,5 +264,6 @@ const fakeHand = [
       true,
       false
     )
-  ]
+  ]);
   
+  testMahjong.findSets(fakeHand);
