@@ -63,81 +63,60 @@ class MahjongTheGame {
         return false;
     }
 
-    containsValidChi(comparingTile, tileList) {
-        //[111222333444]
-        //3
-        //[2223 33444]
-        //[234234234]
-        const validChiNumbers = []
-        for (let index = 0; tileList[index].value < comparingTile.value + 1; index++) {
-            let value = tileList[index].value;
-            if(value === tile.value || value === tile.value + 1 || value === tile.value-1) {
-                validChiNumbers.push(tileList[index]);
+    findSets(hand) {
+        const subsets = hand.groupByType();
+        console.log("Subsets:" + subsets)
+
+        const result_sets = new Map();
+        result_sets.set(TileTypes.Bamboo, []);
+        result_sets.set(TileTypes.Coin, []);
+        result_sets.set(TileTypes.Character, []);
+        
+
+        for (const tile_type of result_sets.keys()) {
+            result_sets.set(tile_type, this.findSetsInSubset(subsets[tile_type]))
+        }
+        console.log(result_sets);
+        console.log("\nGot results: ")
+        for (const tile_type of result_sets.keys()) {
+            console.log(`For type ${tile_type}`)
+            for (result of result_sets.get(tile_type)) {
+                console.log(result)
             }
         }
-        validChiNumbers.sort((a, b) => a === b ? movetoback : check if more or less and then move)
-        const validChis = []
-        
     }
 
-    containsDuplicateTiles(comparingTile, tileList) {
-        let results = [];
-        for (const tile of tileList) {
-            if (tile.value === comparingTile.value) {
-                results.push(tile);
-            }
-        }
-        return results;
-    }
-    
-    handEvalution(hand, ) {
-        this.sortHand(hand.tiles)
-        const checkingMap = hand.groupByType();
-        const validSets = {};
-        validSets.set('Po', []);
-        validSets.set('Pon', []);
-        validSets.set('Kan', []);
-        validSets.set('Chi', []);
-        
-        for (const [type, tileList] of checkingMap.entries()) {
-            // [b1, b1, b1, b1, b2, b2, b2, c1, c2, c3, c4, c5, c6, w11, w11]
-            for (const tile of tileList) {
-                //for each tile in the tileList, check if it has valid pos, pons, kans, or chis
-                //with each 
-                duplicateTiles = this.containsDuplicateTiles(tile, tileList);
-                if (duplicateTiles.length() >= 2) {
-                    validSets['Po'].push([duplicateTiles[0], duplicateTiles[1]]);
-                    if(duplicateTiles.length() >= 3) {
-                        validSets['Pon'].push([duplicateTiles[0], duplicateTiles[1], duplicateTiles[2]]);
-                        if(duplicateTiles.length() === 4) {
-                            validSets['Kan'].push([duplicateTiles[0], duplicateTiles[1], duplicateTiles[2], duplicateTiles[3]]);
-                        }
-                    }
-                    
+    findSetsInSubset(subset) {
+    // The loops here go through each tile and compare it with every following
+    // two tiles in the list
+
+    const results = [];
+    for (let i = 0; i < subset.length - 2; i++) {
+        for (let j = i + 1; j < subset.length - 1; j++) {
+            console.log("Comparing indexes " + i + " with " + j + " and " + (j+1));
+            console.log(subset[i].value)
+            console.log(subset[j].value)
+            console.log(subset[j + 1].value)
+            console.log('Are they equal ' + (subset[i].value === subset[j].value === subset[j + 1].value))
+            console.log('are they ascending ' + ((subset[i].value+2) === (subset[j].value + 1) === subset[j + 1].value));
+            if ((subset[i].value === subset[j].value === subset[j + 1].value) || ((subset[i].value+2) === (subset[j].value + 1) === subset[j + 1].value)) {
+                const validCombo = [subset[i], subset[j], subset[j + 1]];
+                console.log("Its a valid combo!");
+                const subsubset = structuredClone(subset);
+                subsubset.splice(j, 2);
+                subsubset.splice(i, 1);
+
+                const possible_subsets = this.findSetsInSubset(subsubset.slice(i));
+                if (!possible_subsets) {
+                    results.push([validCombo])
                 }
-                //rework the chi function into getting valid chi's from an unordered list
-                if(tile.value < 10 || tileList.length) {
-                    if (this.containsDuplicateTiles(tile1, tile2, tile3)) {
-                        validSets['Chi'].push([tile1, tile2, tile3]);
-                    }
-                }  
+                for (possibility in possible_subsets) {
+                    results.push([validCombo] + possibility)
+                }
             }
         }
-        
-        //stealing/ron
-        //you are stealing from an opponent, check if your steal is valid,
-        //in case of ron, check if you have won
-        //riichi
-        //you are one tile away from victory, check if this is true
-        //tsumo
-        //you have just drawn your last tile, check if you have won
-
-        //hand: [b1, b1, b1, b2, b2, b2, c1, c2, c3, c4, c5, c6, w11, w11]
-        //problem hand: [c1, c9, b1, b9, p1, p9, w10, w11, w12, w13, d14, d15, d16]
-        //problem hand: [b1, b1, b2, b2, b3, b3, b4, b4, b5, b5, b6, b6, w11, w11]
-        //problem hand: [b1, b1, b1, b2, b2, b2, b3, b3, b3, c4, c5, c6, w11, w11]
-        // pon [[b1, b1, b1], [b2, b2, b2]] chi [[c1, c2, c3], [c4, c5, c6]]
-        // po [[b1, b1], [b1, b1], [b2, b2,], [b2, b2], [w11, w11]], kan[]
+    }
+    return results
     }
 }
 
@@ -154,5 +133,112 @@ testMahjong.discardTile(player4.hand, 5);
 // console.log(player2.hand);
 // console.log(player3.hand);
 console.log(player4.hand.tiles);
-console.log(player4.hand.groupByType());
+testMahjong.findSets(player4.hand);
 // console.log(testMahjong.discardPile);
+const fakeHand = [
+    MahjongTile (
+      'CHARACTER',
+      1,
+      '../assets/Man1',
+      false,
+      false,
+      false
+    ),
+    MahjongTile (
+      'CHARACTER',
+      4,
+      '../assets/Man4',
+      false,
+      false,
+      false
+    ),
+    MahjongTile (
+      'CHARACTER',
+      4,
+      '../assets/Man4',
+      false,
+      false,
+      false
+    ),
+    MahjongTile (
+      'CHARACTER',
+      4,
+      '../assets/Man4',
+      false,
+      false,
+      false
+    ),
+    MahjongTile (
+      'BAMBOO',
+      3,
+      '../assets/Sou3',
+      false,
+      false,
+      false
+    ),
+    MahjongTile (
+      'BAMBOO',
+      5,
+      '../assets/Sou5-Dora',
+      false,
+      false,
+      true
+    ),
+    MahjongTile (
+      'BAMBOO',
+      7,
+      '../assets/Sou7',
+      false,
+      false,
+      false
+    ),
+    MahjongTile (
+      'COIN',
+      6,
+      '../assets/Pin6',
+      false,
+      false,
+      false
+    ),
+    MahjongTile (
+      'COIN',
+      7,
+      '../assets/Pin7',
+      false,
+      false,
+      false
+    ),
+    MahjongTile (
+      'COIN',
+      8,
+      '../assets/Pin8',
+      false,
+      false,
+      false
+    ),
+    MahjongTile (
+      'WIND',
+      11,
+      '../assets/South',
+      false,
+      true,
+      false
+    ),
+    MahjongTile (
+      'DRAGON',
+      15,
+      '../assets/Green',
+      false,
+      true,
+      false
+    ),
+    MahjongTile (
+      'DRAGON',
+      16,
+      '../assets/White',
+      false,
+      true,
+      false
+    )
+  ]
+  

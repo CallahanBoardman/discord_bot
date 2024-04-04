@@ -4,20 +4,19 @@ const TileTypes = require('../dataTypes/tile_types');
 class PlayerHand {
     constructor(tiles){
         this.tiles = tiles; //List of tiles
-        this.organizedTiles = []; //List of Lists of tiles organized by type
     }
 
     groupByType() {
+        const organizedTiles = {};
+        for (const tileType of Object.values(TileTypes)) {
+            organizedTiles[tileType] = []
+        }
         for (let i = 0; i < this.tiles.length; i++) {
             const type = this.tiles[i].tileType
               
-             if (!this.organizedTiles.hasOwnProperty(type)) {
-                this.organizedTiles[type] = []
-             }
-              
-             this.organizedTiles[type].push(this.tiles[i])
+             organizedTiles[type].push(this.tiles[i])
         }
-        return this.organizedTiles
+        return organizedTiles
     }
 }
 
