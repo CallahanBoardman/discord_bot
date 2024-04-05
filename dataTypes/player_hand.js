@@ -4,6 +4,7 @@ const TileTypes = require('../dataTypes/tile_types');
 class PlayerHand {
     constructor(tiles){
         this.tiles = tiles; //List of tiles
+        this.openHand = [];
     }
 
     groupByType() {
