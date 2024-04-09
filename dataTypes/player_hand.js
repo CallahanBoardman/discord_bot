@@ -14,8 +14,9 @@ class PlayerHand {
         }
         for (let i = 0; i < this.tiles.length; i++) {
             const type = this.tiles[i].tileType
-              
-             organizedTiles[type].push(this.tiles[i])
+            //   console.log(this.tiles[i])
+            //   console.log(organizedTiles[type])
+             organizedTiles[type].push(this.tiles[i]);
         }
         return organizedTiles
     }

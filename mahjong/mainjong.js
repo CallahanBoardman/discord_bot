@@ -37,29 +37,47 @@ class MahjongTheGame {
   }
 
   discardTile(hand, tileToDiscard) {
-    this.discardPile.push(hand.tiles.splice(tileToDiscard - 1, 1))
+    this.discardPile.push(hand.tiles.splice(tileToDiscard - 1, 1)[0])
   }
 
-  stealAttempt(player, stealType) {
-    if (this.isValidSteal(player, stealType)) {
-      player.hand.tiles.push(this.discardPile.pop());
-      this.sortHand(player.hand.tiles)
-      return (stealType)
-    } else {
-      return (`Thats not a valid ${stealType}`);
+  performSteal(player) {
+    const copiedHand = player.hand;
+    const discardedTile = this.discardPile[this.discardPile.length - 1]
+    if(!discardedTile) {
+      return 'Theres nothing discarded yet!';
     }
+    copiedHand.tiles.push(discardedTile)
+    this.sortHand(copiedHand);
+    const results = this.findSets(copiedHand);
+    const handValue = this.calculateHandValue(results, copiedHand.openHand)
+
+    if(handValue != 0) {
+      return 'This wins you the game, use Ron instead.'
+    }
+
+    const setList = results.get(discardedTile.tileType)[0];
+    for(let i = 0; i < setList.length - 1; i++) {
+      // console.log(setList[i])
+      // console.log(discardedTile)
+      if(setList[i].includes(discardedTile)) {
+        this.discardPile.pop();
+        this.addToOpenHand(player.hand, setList[i])
+        return 'Valid steal.';
+      }
+    }
+
+    return 'You cannot steal that.'
   }
 
-  performChi() {
-
+  addToOpenHand(hand, openSet) {
+    hand.tiles = hand.tiles.filter( ( tile ) => !openSet.includes( tile ) );
+    hand.openHand.push(openSet);
+    console.log(hand.tiles)
+    console.log(hand.openHand)
   }
 
-  performPon() {
-
-  }
-
-  performKan() {
-
+  performKan(player) {
+    add
   }
 
   performRon() {
@@ -69,7 +87,7 @@ class MahjongTheGame {
   performTsumo(player) {
     const results = this.findSets(player.hand)
     if(results.size > 0) {
-      const score = this.calculateHandValue
+      const score = this.calculateHandValue(results, player.openHand)
       if(score === 0) {
         return 'Your hand is complete, however it has zero value. Refer to the mahjong handbook with !scoring to see where you messed up';
       }
@@ -79,8 +97,29 @@ class MahjongTheGame {
     return 'Your hand is bogus';
   }
 
-  calculateHandValue(comboMap) {
+  calculateHandValue(comboMap, openHand) {
+    let invalidCount = 0;
+    let poCount = 0;
 
+    for (const tile_type of comboMap.keys()) {
+      const result = comboMap.get(tile_type)[0];
+      if(!!result && result[1].length != 0) {
+      let last = result.length - 1;
+        if (result[last].length == 2) {
+          if (result[last][0].value === result[last][1].value) {
+            poCount += 1;
+          } else {
+            invalidCount += 1;
+          }
+        } else {
+          invalidCount += 1;
+        }
+      }
+    }
+    if (invalidCount === 0 && poCount === 1) {
+      //do math here
+    }
+    return 0;
   }
 
   isValidSequence(tile1, tile2, tile3) {
@@ -122,40 +161,22 @@ class MahjongTheGame {
   findSets(hand) {
     const subsets = hand.groupByType();
 
-    const result_sets = new Map();
-    result_sets.set(TileTypes.Bamboo, []);
-    result_sets.set(TileTypes.Coin, []);
-    result_sets.set(TileTypes.Character, []);
-    result_sets.set(TileTypes.Wind, []);
-    result_sets.set(TileTypes.Dragon, []);
+    const resultSets = new Map();
+    resultSets.set(TileTypes.Bamboo, []);
+    resultSets.set(TileTypes.Coin, []);
+    resultSets.set(TileTypes.Character, []);
+    resultSets.set(TileTypes.Wind, []);
+    resultSets.set(TileTypes.Dragon, []);
 
-    for (const tile_type of result_sets.keys()) {
+    for (const tile_type of resultSets.keys()) {
       if (tile_type === TileTypes.Dragon || tile_type === TileTypes.Wind) {
-        result_sets.set(tile_type, this.findSetsInSubset(subsets[tile_type], true))
+        resultSets.set(tile_type, this.findSetsInSubset(subsets[tile_type], true))
       } else {
-        result_sets.set(tile_type, this.findSetsInSubset(subsets[tile_type], false))
+        resultSets.set(tile_type, this.findSetsInSubset(subsets[tile_type], false))
       }
     }
 
-    let invalidCount = 0;
-    let poCount = 0;
-    for (const tile_type of result_sets.keys()) {
-      console.log(`For type ${tile_type}`)
-      const result = result_sets[result_sets[tile_type].length - 1].get(tile_type)
-      if (result.length == 2) {
-        if (result[0].value === result[1].value) {
-          poCount += 1;
-        } else {
-          invalidCount += 1;
-        }
-      } else {
-        invalidCount += 1;
-      }
-    }
-    if (invalidCount === 0 || poCount === 1) {
-      return result_sets;
-    }
-    return {};
+    return resultSets;
   }
 
   findSetsInSubset(subset, isHonor) {
@@ -175,11 +196,9 @@ class MahjongTheGame {
         if (isTriplet || isSequence) {
           const validCombo = [subset[i], subset[j], subset[j + 1]];
           const subsubset = structuredClone(subset);
-          // console.log(subsubset);
 
           subsubset.splice(j, 2);
           subsubset.splice(i, 1);
-          // console.log(subsubset);
           const possible_subsets = this.findSetsInSubset(subsubset);
           if (possible_subsets.length === 0) {
             results.push([validCombo, subsubset]);
@@ -195,11 +214,6 @@ class MahjongTheGame {
     return results
   }
 }
-let player1 = new Player(new PlayerHand([]), null, 1);
-let player2 = new Player(new PlayerHand([]), null, 2);
-let player3 = new Player(new PlayerHand([]), null, 3);
-let player4 = new Player(new PlayerHand([]), null, 4);
-const testMahjong = new MahjongTheGame([player4]);
 
 // testMahjong.gameSetup();
 // console.log(player4.hand);
@@ -210,7 +224,7 @@ const testMahjong = new MahjongTheGame([player4]);
 // console.log(player4.hand.tiles);
 // testMahjong.findSets(player4.hand);
 // console.log(testMahjong.discardPile);
-const fakeHand = new PlayerHand([
+const fakeHand = [
   new MahjongTile(
     'CHARACTER',
     1,
@@ -323,6 +337,13 @@ const fakeHand = new PlayerHand([
     true,
     false
   )
-]);
+];
 
-testMahjong.findSets(fakeHand);
+
+let player1 = new Player(new PlayerHand([]), null, 1);
+let player2 = new Player(new PlayerHand([]), null, 2);
+let player3 = new Player(new PlayerHand([]), null, 3);
+let player4 = new Player(new PlayerHand(fakeHand), null, 4);
+const testMahjong = new MahjongTheGame([player4]);
+testMahjong.discardTile(player4.hand, 3)
+console.log(testMahjong.performSteal(player4));
