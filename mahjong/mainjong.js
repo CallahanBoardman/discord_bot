@@ -55,10 +55,8 @@ class MahjongTheGame {
       return 'This wins you the game, use Ron instead.'
     }
 
-    const setList = results.get(discardedTile.tileType)[0];
+    const setList = results.get(discardedTile.tileType);
     for(let i = 0; i < setList.length - 1; i++) {
-      // console.log(setList[i])
-      // console.log(discardedTile)
       if(setList[i].includes(discardedTile)) {
         this.discardPile.pop();
         this.addToOpenHand(player.hand, setList[i])
@@ -72,8 +70,6 @@ class MahjongTheGame {
   addToOpenHand(hand, openSet) {
     hand.tiles = hand.tiles.filter( ( tile ) => !openSet.includes( tile ) );
     hand.openHand.push(openSet);
-    console.log(hand.tiles)
-    console.log(hand.openHand)
   }
 
   performKan(player) {
@@ -100,10 +96,13 @@ class MahjongTheGame {
   calculateHandValue(comboMap, openHand) {
     let invalidCount = 0;
     let poCount = 0;
-
+    
     for (const tile_type of comboMap.keys()) {
-      const result = comboMap.get(tile_type)[0];
-      if(!!result && result[1].length != 0) {
+      const result = comboMap.get(tile_type);
+      if(result.length != 0 && result[1].length != 0) {
+      console.log(result[0])
+
+      console.log(result[1])
       let last = result.length - 1;
         if (result[last].length == 2) {
           if (result[last][0].value === result[last][1].value) {
@@ -176,6 +175,10 @@ class MahjongTheGame {
       }
     }
 
+    for (const possibleCombos of resultSets.values()) {
+
+    }
+   
     return resultSets;
   }
 
@@ -205,7 +208,7 @@ class MahjongTheGame {
           }
 
           for (const possibility of possible_subsets) {
-            results.push([validCombo] + possibility)
+            results.push([validCombo, ...possibility])
           }
         }
       }
@@ -226,7 +229,23 @@ class MahjongTheGame {
 // console.log(testMahjong.discardPile);
 const fakeHand = [
   new MahjongTile(
-    'CHARACTER',
+    'BAMBOO',
+    1,
+    '../assets/Man1',
+    false,
+    false,
+    false
+  ),
+  new MahjongTile(
+    'BAMBOO',
+    1,
+    '../assets/Man1',
+    false,
+    false,
+    false
+  ),
+  new MahjongTile(
+    'BAMBOO',
     1,
     '../assets/Man1',
     false,
@@ -235,8 +254,48 @@ const fakeHand = [
   ),
   new MahjongTile(
     'CHARACTER',
-    1,
-    '../assets/Man1',
+    2,
+    '../assets/Man2',
+    false,
+    false,
+    false
+  ),
+  new MahjongTile(
+    'CHARACTER',
+    2,
+    '../assets/Man2',
+    false,
+    false,
+    false
+  ),
+  new MahjongTile(
+    'CHARACTER',
+    2,
+    '../assets/Man2',
+    false,
+    false,
+    false
+  ),
+  new MahjongTile(
+    'BAMBOO',
+    3,
+    '../assets/Man3',
+    false,
+    false,
+    false
+  ),
+  new MahjongTile(
+    'BAMBOO',
+    3,
+    '../assets/Man4',
+    false,
+    false,
+    false
+  ),
+  new MahjongTile(
+    'BAMBOO',
+    3,
+    '../assets/Man5',
     false,
     false,
     false
@@ -266,77 +325,21 @@ const fakeHand = [
     false
   ),
   new MahjongTile(
-    'BAMBOO',
-    4,
-    '../assets/Sou4',
-    false,
-    false,
-    false
-  ),
-  new MahjongTile(
-    'BAMBOO',
-    5,
-    '../assets/Sou5-Dora',
-    false,
-    false,
-    true
-  ),
-  new MahjongTile(
-    'BAMBOO',
-    6,
-    '../assets/Sou6',
-    false,
-    false,
-    false
-  ),
-  new MahjongTile(
-    'COIN',
-    5,
-    '../assets/Pin5',
-    false,
-    false,
-    false
-  ),
-  new MahjongTile(
-    'COIN',
-    6,
-    '../assets/Pin6',
-    false,
-    false,
-    false
-  ),
-  new MahjongTile(
-    'COIN',
+    'CHARACTER',
     7,
-    '../assets/Pin7',
+    '../assets/Man7',
     false,
     false,
     false
   ),
   new MahjongTile(
-    'DRAGON',
-    15,
-    '../assets/Green',
+    'CHARACTER',
+    7,
+    '../assets/Man7',
     false,
-    true,
+    false,
     false
   ),
-  new MahjongTile(
-    'DRAGON',
-    15,
-    '../assets/Green',
-    false,
-    true,
-    false
-  ),
-  new MahjongTile(
-    'DRAGON',
-    15,
-    '../assets/Green',
-    false,
-    true,
-    false
-  )
 ];
 
 
