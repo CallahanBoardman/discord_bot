@@ -100,9 +100,9 @@ class MahjongTheGame {
     for (const tile_type of comboMap.keys()) {
       const result = comboMap.get(tile_type);
       if(result.length != 0 && result[1].length != 0) {
-      console.log(result[0])
+      console.log(result)
 
-      console.log(result[1])
+      // console.log(result[1])
       let last = result.length - 1;
         if (result[last].length == 2) {
           if (result[last][0].value === result[last][1].value) {
@@ -229,7 +229,7 @@ class MahjongTheGame {
 // console.log(testMahjong.discardPile);
 const fakeHand = [
   new MahjongTile(
-    'BAMBOO',
+    'CHARACTER',
     1,
     '../assets/Man1',
     false,
@@ -237,7 +237,7 @@ const fakeHand = [
     false
   ),
   new MahjongTile(
-    'BAMBOO',
+    'CHARACTER',
     1,
     '../assets/Man1',
     false,
@@ -245,7 +245,7 @@ const fakeHand = [
     false
   ),
   new MahjongTile(
-    'BAMBOO',
+    'CHARACTER',
     1,
     '../assets/Man1',
     false,
@@ -277,7 +277,7 @@ const fakeHand = [
     false
   ),
   new MahjongTile(
-    'BAMBOO',
+    'CHARACTER',
     3,
     '../assets/Man3',
     false,
@@ -285,7 +285,7 @@ const fakeHand = [
     false
   ),
   new MahjongTile(
-    'BAMBOO',
+    'CHARACTER',
     3,
     '../assets/Man4',
     false,
@@ -293,7 +293,7 @@ const fakeHand = [
     false
   ),
   new MahjongTile(
-    'BAMBOO',
+    'CHARACTER',
     3,
     '../assets/Man5',
     false,
