@@ -1,9 +1,9 @@
 const TileTypes = {
-	Character: Symbol("CHARACTER"),
-	Bamboo: Symbol("BAMBOO"),
-	Coin: Symbol("COIN"),
-	Wind: Symbol("WIND"),
-    Dragon: Symbol("DRAGON")
+	Character: "CHARACTER",
+	Bamboo: "BAMBOO",
+	Coin: "COIN",
+	Wind: "WIND",
+    Dragon: "DRAGON"
 }
 
 module.exports = TileTypes;

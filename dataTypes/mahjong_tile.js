@@ -7,13 +7,6 @@ class MahjongTile {
         this.isHonorTile = honorTile ?? false;
         this.isDoraTile = isDoraTile ?? false; // exclusively for the red dora tiles
     }
-
-    //1-13
-    //pon
-    //chi
-    //riichi
-    //tsumo
-    //ron
 }
 
 module.exports = MahjongTile
