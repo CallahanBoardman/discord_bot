@@ -5,6 +5,7 @@ const generateTileset = require('./tileset')
 const TileTypes = require('../dataTypes/tile_types');
 const { max } = require('lodash');
 const MahjongSet = require('../dataTypes/mahjong_set');
+const MahjongScoring = require('./mahjong_scoring');
 const readline = require('readline').createInterface({
   input: process.stdin,
   output: process.stdout
@@ -15,19 +16,31 @@ class MahjongTheGame {
     this.players = players;
     this.drawPile = [];
     this.discardPile = [];
-    this.deadWall = [];
+    this.doraTiles = [];
+    this.uraDoraTiles =[];
+    this.kanTiles = [];
+    this.kanAmount = 0;
     this.tileOrder = Object.values(TileTypes);
     this.whosTurn = 0;
+    this.mahjongScoring = new MahjongScoring(this.drawPile);
   }
 
   gameSetup() {
     this.drawPile = generateTileset().sort((a, b) => 0.5 - Math.random());
+    this.createDeadWall();
     for (let i = 0; i < this.players.length; i++) {
       this.drawTile(this.players[i].hand, 13);
       this.sortHand(this.players[i].hand)
     }
   }
 
+  createDeadWall() {
+    this.kanAmount = 0;
+    this.doraTiles = this.drawPile.slice(0, 5);
+    this.uraDoraTiles = this.drawPile.slice(0, 5);
+    this.kanTiles = this.drawPile.slice(0, 4);
+
+  }
   drawTile(hand, amount) {
     for (let i = 0; i <= amount; i++) {
       hand.tiles.push(this.drawPile.pop());
@@ -86,10 +99,19 @@ class MahjongTheGame {
 
   }
 
+  checkForFancyHands(hand) {
+    const greenTiles = [2, 3, 4, 6, 8, 15];
+    let isGreenHand = true;
+    let is13Orphans = true;
+
+    for(tile of hand.tiles) {
+
+    }
+  }
   performTsumo(player) {
     const results = this.findSets(player.hand)
     if (results.size > 0) {
-      const score = this.calculateHandValue(results, player.openHand)
+      const score = this.mahjongScoring.calculateHandValue(results, player.openHand)
       if (score === 0) {
         return 'Your hand is complete, however it has zero value. Refer to the mahjong handbook with !scoring to see where you messed up';
       }
@@ -125,211 +147,6 @@ class MahjongTheGame {
     if (invalidCount === 0 && poCount > 0) {
       //do the hand creation function here
     }
-  }
-
-  handMaker(comboMap, openHand) {
-    const possibleHands = [];
-    return possibleHands;
-  }
-
-  scoreHand(hand, seatWind, roundWind, isRiichi, isRon) {
-    let score = 0;
-    const maxValue = 13
-    if (!isRon) {
-      if(this.drawPile.length > 88) {
-        return maxValue;
-      }
-      if(this.drawPile.length === 0) {
-        score += 1;
-      }
-      score += 1;
-    } else {
-      if(this.drawPile.length === 0) {
-        score += 1;
-      }
-    }
-
-    if (isRiichi) {
-      score += 1;
-      //insert logic for winning after one turn of declaring here
-    }
-
-    let openCount = 0;
-    let tripletCount = 0;
-    let sequenceCount = 0;
-    let dragonCount = 0;
-    let windCount = 0;
-    let previousStartingValue = 0;
-    let previousTileType = '';
-    let terminalCount = 0;
-    let sameSequenceCount = 0;
-    let sameDuplicateCount = 0;
-    let identicalSequenceCount = 0;
-    let consecutiveSequenceCount = 0;
-    let howManySuits = 0;
-    let poType = '';
-
-    for (let index = 0; index < hand.length; index++) {
-      const set = hand[index];
-      if (set.length > 2) {
-        if (set.isOpenTile) {
-          openCount++;
-        }
-        if (set.type != previousTileType && !set.isHonorTile) {
-          howManySuits++
-        }
-        if (set.isHonorTile) {
-          if (set.value > 13) {
-            score += 1
-            dragonCount++;
-          } else {
-            if (set.value === roundWind) {
-              score += 1
-            }
-            if (set.value === seatWind) {
-              score += 1
-            }
-            windCount++;
-          }
-        }
-        if (set.isSequence) {
-          sequenceCount++;
-          if (set.value === previousStartingValue && set.tileType === previousTileType) {
-            identicalSequenceCount++;
-          }
-          if (set.value === previousStartingValue && set.tileType != previousTileType) {
-            sameSequenceCount++;
-          }
-          if (set.value === previousStartingValue + 2 && set.tileType === previousTileType) {
-            consecutiveSequenceCount++;
-          }
-        } else {
-          tripletCount++;
-          if (set.value === previousStartingValue) {
-            sameDuplicateCount++
-          }
-        }
-        if (set.isTerminal) {
-          terminalCount++;
-        }
-        if (set.isDoraTile) {
-          score += 1;
-        }
-        previousStartingValue = set.value;
-        previousTileType = set.type;
-      } else {
-        poType = set.type;
-        if (set.isTerminal) {
-          terminalCount++;
-        }
-
-        if (set.isHonorTile) {
-          if (set.value > 13) {
-            dragonCount++;
-          } else {
-            windCount++;
-          }
-        }
-      }
-    }
-    let isOpenHand = openCount === 0;
-    let honorCount = dragonCount + windCount;
-    if (honorCount === 0 && terminalCount === 0) {
-      score += 1;
-    }
-    if (dragonCount === 3 && poType === 'DRAGON') {
-      score += 2;
-    }
-    if ((dragonCount === 3 && poType != 'DRAGON') || windCount === 4) {
-      return maxValue;
-    }
-
-    if (tripletCount === 4 || sameDuplicateCount > 1) {
-      score += 2;
-    }
-
-    if (consecutiveSequenceCount === 2 || identicalSequenceCount === 2) {
-      if (isOpenHand) {
-        score += 2;
-      } else {
-        score += 1;
-      }
-    }
-    
-    if(honorCount === 5) {
-      return maxValue;
-    }
-    if(terminalCount === 5) {
-      if(tripletCount === 4) {
-        return maxValue;
-      }
-      if(isOpenHand) {
-        score += 3;
-      } else {
-        score += 2;
-      }
-    }
-    if(honorCount + terminalCount === 5) {
-      if(tripletCount === 4) {
-        score += 2;
-      }
-      if(isOpenHand) {
-        score += 2
-      } else {
-        score += 1
-      }
-    }
-    if(howManySuits === 1) {
-      if(honorCount > 0) {
-        if(isOpenHand) {
-          score += 3;
-        } else {
-          score += 2;
-        }
-      } else {
-        if(isOpenHand) {
-          score += 6;
-        } else {
-          score += 5;
-        }
-      }
-    }
-
-    if (isOpenHand) {
-      if(tripletCount === 4 && !isRon) {
-        return maxValue;
-      }
-      if(tripletCount === 3 & !isRon) {
-        score += 2;
-      }
-      if (sameSequenceCount > 0) {
-        if (sameSequenceCount > 1) {
-          score += 3;
-        } else {
-          score += 1;
-        }
-      }
-
-      if (sequenceCount === 4 && honorCount === 0) {
-        score += 1;
-      }
-    }
-
-    return score;
-  }
-
-  determineHighestScore(scoreList) {
-
-  }
-
-  calculateHandValue(comboMap, openHand) {
-    const scoreList = [];
-    const hands = this.handMaker(comboMap, openHand);
-    for (const hand of hands) {
-      scoreList.push(this.scoreHand(hand));
-    }
-    score = this.determineHighestScore(scoreList);
-    return score;
   }
 
   isValidSequence(tile1, tile2, tile3) {
@@ -373,21 +190,19 @@ class MahjongTheGame {
 
     const resultSets = new Map();
     resultSets.set(TileTypes.Bamboo, []);
-    resultSets.set(TileTypes.Coin, []);
     resultSets.set(TileTypes.Character, []);
+    resultSets.set(TileTypes.Coin, []);
     resultSets.set(TileTypes.Wind, []);
     resultSets.set(TileTypes.Dragon, []);
 
     for (const tile_type of resultSets.keys()) {
       if (tile_type === TileTypes.Dragon || tile_type === TileTypes.Wind) {
-        resultSets.set(tile_type, this.findSetsInSubset(subsets[tile_type], true))
+        const results = this.findSetsInSubset(subsets[tile_type]);
+        resultSets.set(tile_type, results.length === 0 ? [[]]: results, true);
       } else {
-        resultSets.set(tile_type, this.findSetsInSubset(subsets[tile_type], false))
+        const results = this.findSetsInSubset(subsets[tile_type]);
+        resultSets.set(tile_type, results.length === 0 ? [[]] : results, false)
       }
-    }
-
-    for (const possibleCombos of resultSets.values()) {
-
     }
 
     return resultSets;
@@ -414,12 +229,26 @@ class MahjongTheGame {
           subsubset.splice(j, 2);
           subsubset.splice(i, 1);
           const possible_subsets = this.findSetsInSubset(subsubset);
+          let isSequence = this.isValidSequence(subset[i], subset[j], subset[j + 1]);
+          let isTerminal = validCombo[0].value === 1 || validCombo[2].value === 9;
+          //TODO: CHECK FOR OTHER DORA TILES HERE
+          const isDoraTile = validCombo[0].isDoraTile || validCombo[1].isDoraTile || validCombo[2].isDoraTile;
+          const setInformation = new MahjongSet(validCombo[0].tileType, validCombo[0].value, validCombo.length, validCombo[0].isOpenTile, isSequence, isTerminal, validCombo[0].isHonorTile, isDoraTile);
+
           if (possible_subsets.length === 0) {
-            results.push([validCombo, subsubset]);
+            results.push([setInformation, subsubset]);
           }
 
           for (const possibility of possible_subsets) {
-            results.push([validCombo, ...possibility])
+            if(possibility.length === 2) {
+              const possibleDouble = possibility[1]
+              if (possibleDouble.length === 2) {
+                if(possibleDouble[0].value === possibleDouble[1].value) {
+                  possibility[1] = new MahjongSet(possibleDouble[0].tileType, possibleDouble[0].value, possibleDouble.length, false, false, possibleDouble[0].value === 1 || possibleDouble[1].value === 9, possibleDouble[0].isHonorTile, false);
+                }
+              }
+            }
+            results.push([setInformation, ...possibility])
           }
         }
       }
@@ -512,7 +341,7 @@ const fakeHand = [
     false
   ),
   new MahjongTile(
-    'CHARACTER',
+    'BAMBOO',
     4,
     '../assets/Man4',
     false,
@@ -520,7 +349,7 @@ const fakeHand = [
     false
   ),
   new MahjongTile(
-    'CHARACTER',
+    'BAMBOO',
     4,
     '../assets/Man4',
     false,
@@ -528,7 +357,7 @@ const fakeHand = [
     false
   ),
   new MahjongTile(
-    'CHARACTER',
+    'BAMBOO',
     4,
     '../assets/Man4',
     false,
@@ -565,5 +394,4 @@ let player2 = new Player(new PlayerHand([]), null, 2);
 let player3 = new Player(new PlayerHand([]), null, 3);
 let player4 = new Player(new PlayerHand(fakeHand), null, 4);
 const testMahjong = new MahjongTheGame([player4]);
-testMahjong.discardTile(player4.hand, 3)
-console.log(testMahjong.scoreHand(fakeSets, 'EAST', 'EAST', true, true));
+testMahjong.performTsumo(player4, []);
