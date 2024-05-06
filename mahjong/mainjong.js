@@ -12,7 +12,8 @@ const readline = require('readline').createInterface({
 });
 
 class MahjongTheGame {
-  constructor(players) {
+  constructor(players, roundWind) {
+    this.roundWind = roundWind;
     this.players = players;
     this.drawPile = [];
     this.discardPile = [];
@@ -22,7 +23,7 @@ class MahjongTheGame {
     this.kanAmount = 0;
     this.tileOrder = Object.values(TileTypes);
     this.whosTurn = 0;
-    this.mahjongScoring = new MahjongScoring(this.drawPile);
+    this.mahjongScoring = new MahjongScoring(this.drawPile, this.roundWind);
   }
 
   gameSetup() {
@@ -129,8 +130,6 @@ class MahjongTheGame {
       const result = comboMap.get(tile_type);
       if (result.length != 0 && result[1].length != 0) {
         console.log(result)
-
-        // console.log(result[1])
         let last = result.length - 1;
         if (result[last].length == 2) {
           if (result[last][0].value === result[last][1].value) {
@@ -250,7 +249,10 @@ class MahjongTheGame {
             }
             results.push([setInformation, ...possibility])
           }
+        // } else if() {
+          //TODO: LET PO GO THROUGH HERE
         }
+
       }
 
     }
@@ -267,131 +269,11 @@ class MahjongTheGame {
 // console.log(player4.hand.tiles);
 // testMahjong.findSets(player4.hand);
 // console.log(testMahjong.discardPile);
-const fakeHand = [
-  new MahjongTile(
-    'CHARACTER',
-    1,
-    '../assets/Man1',
-    false,
-    false,
-    false
-  ),
-  new MahjongTile(
-    'CHARACTER',
-    1,
-    '../assets/Man1',
-    false,
-    false,
-    false
-  ),
-  new MahjongTile(
-    'CHARACTER',
-    1,
-    '../assets/Man1',
-    false,
-    false,
-    false
-  ),
-  new MahjongTile(
-    'CHARACTER',
-    2,
-    '../assets/Man2',
-    false,
-    false,
-    false
-  ),
-  new MahjongTile(
-    'CHARACTER',
-    2,
-    '../assets/Man2',
-    false,
-    false,
-    false
-  ),
-  new MahjongTile(
-    'CHARACTER',
-    2,
-    '../assets/Man2',
-    false,
-    false,
-    false
-  ),
-  new MahjongTile(
-    'CHARACTER',
-    3,
-    '../assets/Man3',
-    false,
-    false,
-    false
-  ),
-  new MahjongTile(
-    'CHARACTER',
-    3,
-    '../assets/Man4',
-    false,
-    false,
-    false
-  ),
-  new MahjongTile(
-    'CHARACTER',
-    3,
-    '../assets/Man5',
-    false,
-    false,
-    false
-  ),
-  new MahjongTile(
-    'BAMBOO',
-    4,
-    '../assets/Man4',
-    false,
-    false,
-    false
-  ),
-  new MahjongTile(
-    'BAMBOO',
-    4,
-    '../assets/Man4',
-    false,
-    false,
-    false
-  ),
-  new MahjongTile(
-    'BAMBOO',
-    4,
-    '../assets/Man4',
-    false,
-    false,
-    false
-  ),
-  new MahjongTile(
-    'CHARACTER',
-    7,
-    '../assets/Man7',
-    false,
-    false,
-    false
-  ),
-  new MahjongTile(
-    'CHARACTER',
-    7,
-    '../assets/Man7',
-    false,
-    false,
-    false
-  ),
-];
 
-const fakeSets = [
-  new MahjongSet('DRAGON', 14, 3, false, true, true, false, false),
-  new MahjongSet('DRAGON', 15, 3, false, true, true, false, false),
-  new MahjongSet('CHARACTER', 1, 3, false, true, true, false, false),
-  new MahjongSet('CHARACTER', 4, 3, false, true, false, false, false),
-  new MahjongSet('DRAGON', 16, 2, false, false, true, false, false),
-];
+
 let player1 = new Player(new PlayerHand([]), null, 1);
 let player2 = new Player(new PlayerHand([]), null, 2);
 let player3 = new Player(new PlayerHand([]), null, 3);
 let player4 = new Player(new PlayerHand(fakeHand), null, 4);
-const testMahjong = new MahjongTheGame([player4]);
+const testMahjong = new MahjongTheGame([player4], 12);
 testMahjong.performTsumo(player4, []);
