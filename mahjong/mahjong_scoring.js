@@ -1,5 +1,5 @@
 const MahjongSet = require('../dataTypes/mahjong_set');
-
+const { max } = require('lodash');
 class MahjongScoring {
   constructor(drawPile, roundWind) {
     this.drawPile = drawPile;
@@ -56,7 +56,7 @@ class MahjongScoring {
     let sameDuplicateCount = 0;
     let identicalSequenceCount = 0;
     let consecutiveSequenceCount = 0;
-    let howManySuits = 1;
+    let howManySuits = 0;
     let poType = '';
 
     for (let index = 0; index < hand.length; index++) {
@@ -65,7 +65,8 @@ class MahjongScoring {
         if (set.isOpenTile) {
           openCount++;
         }
-        if (set.type != previousTileType && !set.isHonorTile) {
+
+        if (set.tileType !== previousTileType && !set.isHonorTile ) {
           howManySuits++
         }
         if (set.isHonorTile) {
@@ -106,9 +107,9 @@ class MahjongScoring {
           score += 1;
         }
         previousStartingValue = set.startingValue;
-        previousTileType = set.type;
+        previousTileType = set.tileType;
       } else {
-        poType = set.type;
+        poType = set.tileType;
         if (set.isTerminal) {
           terminalCount++;
         }
@@ -122,6 +123,8 @@ class MahjongScoring {
         }
       }
     }
+
+
     let isNotOpenHand = openCount === 0;
     let honorCount = dragonCount + windCount;
     if (honorCount === 0 && terminalCount === 0) {
@@ -188,7 +191,6 @@ class MahjongScoring {
       }
     }
 
-    console.log(score);
     if (isNotOpenHand) {
       if (tripletCount === 4 && !isRon) {
         return maxValue;
@@ -213,7 +215,7 @@ class MahjongScoring {
   }
 
   determineHighestScore(scoreList) {
-
+    return max(scoreList);
   }
 
   calculateHandValue(comboMap, seatWind, isRiichi, isRon) {
@@ -221,12 +223,9 @@ class MahjongScoring {
 
     const hands = this.handMaker(comboMap);
 
-    // console.log(hands);
-
     for (const hand of hands) {
       scoreList.push(this.scoreHand(hand, seatWind, isRiichi, isRon));
     }
-    // console.log(scoreList);
     let score = this.determineHighestScore(scoreList);
     return score;
   }

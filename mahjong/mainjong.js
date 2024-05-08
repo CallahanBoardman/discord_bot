@@ -6,6 +6,8 @@ const TileTypes = require('../dataTypes/tile_types');
 const { max } = require('lodash');
 const MahjongSet = require('../dataTypes/mahjong_set');
 const MahjongScoring = require('./mahjong_scoring');
+const fakeHands = require('../tests/MahjongTests/fake_mahjong_hands');
+
 const readline = require('readline').createInterface({
   input: process.stdin,
   output: process.stdout
@@ -109,6 +111,7 @@ class MahjongTheGame {
 
     }
   }
+
   performTsumo(player) {
     const results = this.findSets(player.hand)
     if (results.size > 0) {
@@ -129,7 +132,6 @@ class MahjongTheGame {
     for (const tile_type of comboMap.keys()) {
       const result = comboMap.get(tile_type);
       if (result.length != 0 && result[1].length != 0) {
-        console.log(result)
         let last = result.length - 1;
         if (result[last].length == 2) {
           if (result[last][0].value === result[last][1].value) {
@@ -274,6 +276,6 @@ class MahjongTheGame {
 let player1 = new Player(new PlayerHand([]), null, 1);
 let player2 = new Player(new PlayerHand([]), null, 2);
 let player3 = new Player(new PlayerHand([]), null, 3);
-let player4 = new Player(new PlayerHand(fakeHand), null, 4);
+let player4 = new Player(new PlayerHand(fakeHands.fakeHand), null, 4);
 const testMahjong = new MahjongTheGame([player4], 12);
 testMahjong.performTsumo(player4, []);

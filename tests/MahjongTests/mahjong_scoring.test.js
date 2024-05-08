@@ -14,13 +14,13 @@ test('Open hand with one dragon and round and seat wind boosted east returns 3',
 });
 
 test('Open hand with no value returns 0', () => {
-  expect(mahjong_scoring.scoreHand(fakeHands.fakeOpenWorthlessSet, 12, 12, false, true)).toBe(0);
+  expect(mahjong_scoring.scoreHand(fakeHands.fakeOpenWorthlessSet, 11, 11, false, true)).toBe(0);
 });
 
 test('Closed sequence hand with no valuable pairs returns 1', () => {
   expect(mahjong_scoring.scoreHand(fakeHands.fakePinfuSets, 12, 12, false, true)).toBe(1);
 });
 
-test('Closed terminal and honor hand returns 6', () => {
-  expect(mahjong_scoring.scoreHand(fakeHands.fakeTerminalHonorSet, 12, 12, false, true)).toBe(6);
+test('Closed terminal and honor hand returns 8', () => {
+  expect(mahjong_scoring.scoreHand(fakeHands.fakeTerminalHonorSet, 12, 12, false, true)).toBe(8);
 });
