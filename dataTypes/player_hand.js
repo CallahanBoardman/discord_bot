@@ -1,5 +1,5 @@
-const MahjongTile = require('../dataTypes/mahjong_tile');
-const TileTypes = require('../dataTypes/tile_types');
+import MahjongTile from '../dataTypes/mahjong_tile.js';
+import TileTypes from '../dataTypes/tile_types.js';
 
 class PlayerHand {
     constructor(tiles){
@@ -22,4 +22,4 @@ class PlayerHand {
     }
 }
 
-module.exports = PlayerHand
+export default PlayerHand

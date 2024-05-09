@@ -1,17 +1,11 @@
-const MahjongTile = require('../dataTypes/mahjong_tile');
-const Player = require('../dataTypes/player');
-const PlayerHand = require('../dataTypes/player_hand');
-const generateTileset = require('./tileset')
-const TileTypes = require('../dataTypes/tile_types');
-const { max } = require('lodash');
-const MahjongSet = require('../dataTypes/mahjong_set');
-const MahjongScoring = require('./mahjong_scoring');
-const fakeHands = require('../tests/MahjongTests/fake_mahjong_hands');
-
-const readline = require('readline').createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
+import MahjongTile from '../dataTypes/mahjong_tile.js';
+import Player from '../dataTypes/player.js';
+import PlayerHand from '../dataTypes/player_hand.js';
+import generateTileset from './tileset.js';
+import TileTypes from '../dataTypes/tile_types.js';
+import MahjongSet from '../dataTypes/mahjong_set.js';
+import MahjongScoring from './mahjong_scoring.js';
+import fakeHands from '../tests/MahjongTests/fake_mahjong_hands.js';
 
 class MahjongTheGame {
   constructor(players, roundWind) {
@@ -197,7 +191,7 @@ class MahjongTheGame {
     resultSets.set(TileTypes.Dragon, []);
 
     for (const tile_type of resultSets.keys()) {
-      if (tile_type === TileTypes.Dragon || tile_type === TileTypes.Wind) {
+      if (tile_type === TileTypes.Dragon || tile_type ===TileTypes.Wind) {
         const results = this.findSetsInSubset(subsets[tile_type]);
         resultSets.set(tile_type, results.length === 0 ? [[]]: results, true);
       } else {
@@ -262,6 +256,7 @@ class MahjongTheGame {
   }
 }
 
+export default MahjongTheGame;
 // testMahjong.gameSetup();
 // console.log(player4.hand);
 // testMahjong.discardTile(player4.hand, 5);
@@ -273,9 +268,9 @@ class MahjongTheGame {
 // console.log(testMahjong.discardPile);
 
 
-let player1 = new Player(new PlayerHand([]), null, 1);
-let player2 = new Player(new PlayerHand([]), null, 2);
-let player3 = new Player(new PlayerHand([]), null, 3);
+// let player1 = new Player(new PlayerHand([]), null, 1);
+// let player2 = new Player(new PlayerHand([]), null, 2);
+// let player3 = new Player(new PlayerHand([]), null, 3);
 let player4 = new Player(new PlayerHand(fakeHands.fakeHand), null, 4);
 const testMahjong = new MahjongTheGame([player4], 12);
 testMahjong.performTsumo(player4, []);

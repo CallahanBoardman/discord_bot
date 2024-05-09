@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "discordbot.js",
+  "type": "module",
   "dependencies": {
     "@canvas-fonts/helveticaneue": "^1.0.4",
     "@napi-rs/canvas": "^0.1.51",

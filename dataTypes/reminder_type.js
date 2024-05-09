@@ -14,4 +14,4 @@ class ReminderData {
       }
 }
 
-module.exports = ReminderData
+export default ReminderData

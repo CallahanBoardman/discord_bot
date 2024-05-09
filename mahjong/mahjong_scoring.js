@@ -1,5 +1,4 @@
-const MahjongSet = require('../dataTypes/mahjong_set');
-const { max } = require('lodash');
+import MahjongSet from '../dataTypes/mahjong_set.js';
 class MahjongScoring {
   constructor(drawPile, roundWind) {
     this.drawPile = drawPile;
@@ -215,7 +214,7 @@ class MahjongScoring {
   }
 
   determineHighestScore(scoreList) {
-    return max(scoreList);
+    return Math.max(...scoreList);
   }
 
   calculateHandValue(comboMap, seatWind, isRiichi, isRon) {
@@ -226,8 +225,8 @@ class MahjongScoring {
     for (const hand of hands) {
       scoreList.push(this.scoreHand(hand, seatWind, isRiichi, isRon));
     }
-    let score = this.determineHighestScore(scoreList);
-    return score;
+    console.log(this.determineHighestScore(scoreList));
+    return this.determineHighestScore(scoreList);;
   }
 }
-module.exports = MahjongScoring
+export default MahjongScoring

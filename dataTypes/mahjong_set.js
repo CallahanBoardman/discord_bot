@@ -11,4 +11,4 @@ class MahjongSet {
     }
 }
 
-module.exports = MahjongSet
+export default MahjongSet

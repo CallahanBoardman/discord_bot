@@ -1,5 +1,5 @@
-const MahjongTile = require('../dataTypes/mahjong_tile');
-const TileTypes = require('../dataTypes/tile_types');
+import MahjongTile from '../dataTypes/mahjong_tile.js';
+import TileTypes from '../dataTypes/tile_types.js';
 
 function generateTileset() {
     const tileList = []
@@ -27,4 +27,4 @@ function generateTileset() {
 
     return tileList;
 }
-module.exports = generateTileset;
+export default generateTileset;

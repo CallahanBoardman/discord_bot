@@ -1,5 +1,5 @@
-const MahjongTile = require('../../dataTypes/mahjong_tile');
-const MahjongSet = require('../../dataTypes/mahjong_set');
+import MahjongTile from '../../dataTypes/mahjong_tile.js';
+import MahjongSet from '../../dataTypes/mahjong_set.js';
 
   const fakePinfuSets = [
     new MahjongSet(
@@ -327,7 +327,8 @@ const MahjongSet = require('../../dataTypes/mahjong_set');
       false
     ),
   ];
-module.exports = {
+  
+export default {
   fakeHand,
   fakeOpenSet,
   fakeOpenWorthlessSet,

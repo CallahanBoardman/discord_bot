@@ -1,6 +1,6 @@
-const { forEach } = require('lodash');
-const { log } = require('node:console');
-const fs = require('node:fs');
+import { forEach } from 'lodash';
+import { log } from 'node:console';
+import { writeFileSync, readFileSync } from 'node:fs';
 
 class GlobalRepo {
     
@@ -17,13 +17,13 @@ class GlobalRepo {
     }
 
     updateMap() {
-        fs.writeFileSync('reminders.json', JSON.stringify(Object.fromEntries(this.reminderMap), null, 4), (error) => {
+        writeFileSync('reminders.json', JSON.stringify(Object.fromEntries(this.reminderMap), null, 4), (error) => {
             if (error) throw error;
         });
     }
 
     readMap() {
-        let jsonStr = fs.readFileSync('./reminders.json', 'utf8');
+        let jsonStr = readFileSync('./reminders.json', 'utf8');
 		let parsedStr = JSON.parse(jsonStr);
         this.reminderMap = new Map(Object.entries(parsedStr));
         this.id = this.reminderMap.size ? Math.max(...this.reminderMap.keys())+1 : 0;
@@ -40,4 +40,5 @@ class GlobalRepo {
 let globalrepo = new GlobalRepo();
 globalrepo.readMap();
 
-module.exports.globalrepo = globalrepo;
+const _globalrepo = globalrepo;
+export { _globalrepo as globalrepo };

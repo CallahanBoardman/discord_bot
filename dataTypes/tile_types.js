@@ -6,4 +6,4 @@ const TileTypes = {
     Dragon: "DRAGON"
 }
 
-module.exports = TileTypes;
+export default TileTypes;

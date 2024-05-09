@@ -9,4 +9,4 @@ class MahjongTile {
     }
 }
 
-module.exports = MahjongTile
+export default MahjongTile

@@ -1,10 +1,14 @@
-const MahjongTheGame = require('../../mahjong/mainjong');
-const fakeHands = require('./fake_mahjong_hands');
+import MahjongTheGame from '../../mahjong/mainjong.js';
+import { fakeHand } from './fake_mahjong_hands.js';
+const PlayerHand = jest.requireMock('../../dataTypes/player_hand.js', () => ({
+  groupByType: jest.fn(),
+}));
 
 const mahjong_gaming = new MahjongTheGame([], 12);
 beforeEach(() => {
-
-  });
+  PlayerHand.mockClear();
+  PlayerHand.groupByType = jest.fn(() => fakeHand);
+});
   
   afterEach(() => {
 
@@ -23,6 +27,7 @@ beforeEach(() => {
 // });
 
 test('findSets returns a list of multiple sets', () => {
-  results = mahjong_gaming.findSets(fakeHands.fakeHand)
+  PlayerHand.groupByType.mockReturnValueOnce(fakeHand)
+  results = mahjong_gaming.findSets(fakeHand)
   expect(results.length).toBe(7);
 });

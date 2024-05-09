@@ -1,8 +1,8 @@
-const { AttachmentBuilder, SlashCommandBuilder, Client, Events, GatewayIntentBits } = require('discord.js');
-const { globalrepo } = require('../../global-repo');
-const Canvas = require('@napi-rs/canvas');
-const { GlobalFonts } = require('@napi-rs/canvas');
-const { request } = require('undici');
+import { AttachmentBuilder, SlashCommandBuilder, Client, Events, GatewayIntentBits } from 'discord.js';
+import { globalrepo } from '../../global-repo.js';
+import { createCanvas, loadImage } from '@napi-rs/canvas';
+import { GlobalFonts } from '@napi-rs/canvas';
+import { request } from 'undici';
 
 GlobalFonts.registerFromPath('./assets/edosz.ttf', 'Yakuza Sans');
 // /banishtothyelandofyi(thetermforbarbarians)
@@ -29,83 +29,73 @@ const applyText = (canvas, text) => {
 	return context.font;
 };
 
-module.exports = {
-	data: new SlashCommandBuilder()
-		.setName('mahjongify')
-		.setDescription('Banishes a person to the mahjong dimension.')
-		.addUserOption(option => 
-			option
-			.setName('user')
-			.setDescription('Enter the banishy')
-			.setRequired(true)
-			)
-			.addStringOption(option =>
-				option
-			.setName('toptext')
-			.setDescription('Enter the top text')
-			.setRequired(true))
-			.addStringOption(option =>
-				option
-			.setName('bottomtext')
-			.setDescription('Text that will appear on bottom')
-			.setRequired(false))
-			.addStringOption(option =>
-				option
-			.setName('outlinecolor')
-			.setDescription('Color that appears outside')
-			.setRequired(false))
-			.addStringOption(option =>
-				option
-			.setName('fillcolor')
-			.setDescription('Colour that appears inside')
-			.setRequired(false)),
-	async execute(interaction) {
-		const user = interaction.options.getUser('user');
-		const top = interaction.options.getString('toptext');
-		const bottom = interaction.options.getString('bottomtext') ?? '';
-		const outside = interaction.options.getString('outlinecolor') ?? '#000000';
-		const inside = interaction.options.getString('fillcolor') ?? '#ffffff';
-		const canvas = Canvas.createCanvas(600, 800);
-		const context = canvas.getContext('2d');
+export const data = new SlashCommandBuilder()
+	.setName('mahjongify')
+	.setDescription('Banishes a person to the mahjong dimension.')
+	.addUserOption(option => option
+		.setName('user')
+		.setDescription('Enter the banishy')
+		.setRequired(true)
+	)
+	.addStringOption(option => option
+		.setName('toptext')
+		.setDescription('Enter the top text')
+		.setRequired(true))
+	.addStringOption(option => option
+		.setName('bottomtext')
+		.setDescription('Text that will appear on bottom')
+		.setRequired(false))
+	.addStringOption(option => option
+		.setName('outlinecolor')
+		.setDescription('Color that appears outside')
+		.setRequired(false))
+	.addStringOption(option => option
+		.setName('fillcolor')
+		.setDescription('Colour that appears inside')
+		.setRequired(false));
+export async function execute(interaction) {
+	const user = interaction.options.getUser('user');
+	const top = interaction.options.getString('toptext');
+	const bottom = interaction.options.getString('bottomtext') ?? '';
+	const outside = interaction.options.getString('outlinecolor') ?? '#000000';
+	const inside = interaction.options.getString('fillcolor') ?? '#ffffff';
+	const canvas = createCanvas(600, 800);
+	const context = canvas.getContext('2d');
 
-		const background = await Canvas.loadImage('./assets/Front.png');
+	const background = await loadImage('./assets/Front.png');
 
-		context.drawImage(background, 0, 0, canvas.width, canvas.height);
-		
-		// Using undici to make HTTP requests for better performance
-		const { body } = await request(user.displayAvatarURL({ extension: 'png' }));
-		const avatar = await Canvas.loadImage(await body.arrayBuffer());
+	context.drawImage(background, 0, 0, canvas.width, canvas.height);
 
-		// If you don't care about the performance of HTTP requests, you can instead load the avatar using
-		// const avatar = await Canvas.loadImage(interaction.user.displayAvatarURL({ extension: 'jpg' }));
+	// Using undici to make HTTP requests for better performance
+	const { body } = await request(user.displayAvatarURL({ extension: 'png' }));
+	const avatar = await loadImage(await body.arrayBuffer());
 
-		// Draw a shape onto the main canvas
-		context.drawImage(avatar, 100, 200, 400, 400);
+	// If you don't care about the performance of HTTP requests, you can instead load the avatar using
+	// const avatar = await Canvas.loadImage(interaction.user.displayAvatarURL({ extension: 'jpg' }));
+	// Draw a shape onto the main canvas
+	context.drawImage(avatar, 100, 200, 400, 400);
 
-		context.font = applyText(canvas, top);
-		context.textAlign = "center";
-		// Select the style that will be used to .fill the text in
-		//dark background
-		// context.fillStyle = '#d22b28';
-		// context.strokeStyle ='#ffffff';
+	context.font = applyText(canvas, top);
+	context.textAlign = "center";
+	// Select the style that will be used to .fill the text in
+	//dark background
+	// context.fillStyle = '#d22b28';
+	// context.strokeStyle ='#ffffff';
+	console.log(inside);
+	console.log(outside);
+	//light background
+	context.fillStyle = inside;
+	context.strokeStyle = outside;
+	context.lineWidth = 1.5;
+	context.fillText(top, canvas.width / 2, canvas.height / 5);
+	context.strokeText(top, canvas.width / 2, canvas.height / 5);
 
-		console.log(inside)
-		console.log(outside)
-		//light background
-		context.fillStyle = inside;
-		context.strokeStyle = outside;
-		context.lineWidth = 1.5;
-		context.fillText(top, canvas.width / 2, canvas.height / 5);
-		context.strokeText(top, canvas.width / 2, canvas.height / 5);
+	context.font = applyText(canvas, bottom);
+	context.fillText(bottom, canvas.width / 2, canvas.height / 1.2);
+	context.strokeText(bottom, canvas.width / 2, canvas.height / 1.2);
+	// Use the helpful Attachment class structure to process the file for you
+	const attachment = new AttachmentBuilder(await canvas.encode('png'), { name: 'profile-image.png' });
 
-		context.font = applyText(canvas, bottom);
-		context.fillText(bottom, canvas.width / 2, canvas.height / 1.2);
-		context.strokeText(bottom, canvas.width / 2, canvas.height / 1.2);
-		// Use the helpful Attachment class structure to process the file for you
-		const attachment = new AttachmentBuilder(await canvas.encode('png'), { name: 'profile-image.png' });
+	interaction.reply({ files: [attachment] });
 
-		interaction.reply({ files: [attachment] });
-
-		// await interaction.reply(`Banished ${user.displayName} to ${yi}`);
-	},
-};
+}

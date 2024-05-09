@@ -1,12 +1,12 @@
-const { clientId, guildId, token } = require('./config.json');
-const path = require('node:path');
-const fs = require('node:fs');
-const Canvas = require('@napi-rs/canvas');
-const { GlobalFonts } = require('@napi-rs/canvas');
-const schedule = require('node-schedule')
-const { globalrepo } = require('./global-repo')
-const { request } = require('undici');
-const { AttachmentBuilder, Client, Collection, Events, GatewayIntentBits } = require('discord.js');
+import { clientId, guildId, token } from './config.json';
+import { join } from 'node:path';
+import { readdirSync } from 'node:fs';
+import { createCanvas, loadImage } from '@napi-rs/canvas';
+import { GlobalFonts } from '@napi-rs/canvas';
+import { RecurrenceRule, Range, scheduleJob } from 'node-schedule';
+import { globalrepo } from './global-repo';
+import { request } from 'undici';
+import { AttachmentBuilder, Client, Collection, Events, GatewayIntentBits } from 'discord.js';
 const client = new Client({ intents: 
     [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 	
@@ -15,14 +15,14 @@ client.on('ready', () => {
 });
 
 client.commands = new Collection();
-const foldersPath = path.join(__dirname, 'commands');
-const commandFolders = fs.readdirSync(foldersPath);
+const foldersPath = join(__dirname, 'commands');
+const commandFolders = readdirSync(foldersPath);
 
 for (const folder of commandFolders) {
-	const commandsPath = path.join(foldersPath, folder);
-	const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+	const commandsPath = join(foldersPath, folder);
+	const commandFiles = readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 	for (const file of commandFiles) {
-		const filePath = path.join(commandsPath, file);
+		const filePath = join(commandsPath, file);
 		const command = require(filePath);
 		if ('data' in command && 'execute' in command) {
 			client.commands.set(command.data.name, command);
@@ -63,10 +63,10 @@ client.login(token);
 client.on('messageCreate', async msg => {
     // You can view the msg object here with console.log(msg)
      if (msg.content === 'Hello') {
-		const canvas = Canvas.createCanvas(600, 800);
+		const canvas = createCanvas(600, 800);
 		const context = canvas.getContext('2d');
 
-		const background = await Canvas.loadImage(`./assets/Front.png`);
+		const background = await loadImage(`./assets/Front.png`);
 		// Select the font size and type from one of the natively available fonts
 		context.font = '100px Comic Sans MS';
 
@@ -86,9 +86,9 @@ client.on('messageCreate', async msg => {
     });
 
 
-const schedule_rule = new schedule.RecurrenceRule();
-schedule_rule.minute = new schedule.Range(0, 59, 1);
-schedule.scheduleJob(schedule_rule, async () => {
+const schedule_rule = new RecurrenceRule();
+schedule_rule.minute = new Range(0, 59, 1);
+scheduleJob(schedule_rule, async () => {
 	let reminderMap = globalrepo.reminderMap;
 	let remindersToDelete = [];
 		for(const [id, reminder] of reminderMap) {
