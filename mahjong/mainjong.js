@@ -8,8 +8,8 @@ import MahjongScoring from './mahjong_scoring.js';
 import fakeHands from '../tests/MahjongTests/fake_mahjong_hands.js';
 
 class MahjongTheGame {
-  constructor(players, roundWind) {
-    this.roundWind = roundWind;
+  constructor(players) {
+    this.roundWind = 1;
     this.players = players;
     this.drawPile = [];
     this.discardPile = [];
@@ -38,6 +38,7 @@ class MahjongTheGame {
     this.kanTiles = this.drawPile.slice(0, 4);
 
   }
+
   drawTile(hand, amount) {
     for (let i = 0; i <= amount; i++) {
       hand.tiles.push(this.drawPile.pop());
@@ -49,15 +50,23 @@ class MahjongTheGame {
       - (this.tileOrder.indexOf(b.tileType) * 10 + b.value))
   }
 
-  discardTile(hand, tileToDiscard) {
-    this.discardPile.push(hand.tiles.splice(tileToDiscard - 1, 1)[0])
+  discardTile(player, tileToDiscard) {
+    if(player.seatPosition !== this.whosTurn + 10) {
+      return 'Its not your turn bub';
+    }
+    if(tileToDiscard > 13 || tileToDiscard < 1) {
+      return 'Thats not a valid tile silly!'
+    }
+    this.discardPile.push(player.hand.tiles.splice(tileToDiscard - 1, 1)[0])
+    this.whosTurn < this.players.length ? this.whosTurn+= 1 : this.whosTurn = 0;
+    return player.hand.tiles.toString();
   }
 
   performSteal(player) {
     const copiedHand = player.hand;
     const discardedTile = this.discardPile[this.discardPile.length - 1]
     if (!discardedTile) {
-      return 'Theres nothing discarded yet!';
+      return 'Theres nothing to steal!';
     }
     copiedHand.tiles.push(discardedTile)
     this.sortHand(copiedHand);
@@ -75,6 +84,7 @@ class MahjongTheGame {
       if (setList[i].includes(discardedTile)) {
         this.discardPile.pop();
         this.addToOpenHand(player.hand, setList[i])
+        this.whosTurn = player.seatPosition - 10
         return 'Valid steal.';
       }
     }

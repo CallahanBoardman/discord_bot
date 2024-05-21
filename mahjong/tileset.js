@@ -13,7 +13,7 @@ function generateTileset() {
             } else{
                 tileList.push(new MahjongTile(TileTypes.Character, j, `../assets/Man${j}`))
                 tileList.push(new MahjongTile(TileTypes.Coin, j, `../assets/Pin${j}`))
-                tileList.push(new MahjongTile(TileTypes.Bamboo, j, `../assets/Sou${j}`))
+                tileList.push(new MahjongTile(TileTypes.Bamboo, j, `../assets/Sou${j}`, false, false, value === 2 || value === 3 || value === 4 || value === 6 || value === 8))
             }
         }
         tileList.push(new MahjongTile(TileTypes.Wind, 10, `../assets/North`, true))
@@ -21,7 +21,7 @@ function generateTileset() {
         tileList.push(new MahjongTile(TileTypes.Wind, 12, `../assets/East`, true))
         tileList.push(new MahjongTile(TileTypes.Wind, 13, `../assets/West`, true))
         tileList.push(new MahjongTile(TileTypes.Dragon, 14, `../assets/Red`, true))
-        tileList.push(new MahjongTile(TileTypes.Dragon, 15, `../assets/Green`, true))
+        tileList.push(new MahjongTile(TileTypes.Dragon, 15, `../assets/Green`, true, false, true))
         tileList.push(new MahjongTile(TileTypes.Dragon, 16, `../assets/White`, true))
     }
 

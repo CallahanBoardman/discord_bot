@@ -1,18 +1,20 @@
 import MahjongTheGame from '../../mahjong/mainjong.js';
-import { fakeHand } from './fake_mahjong_hands.js';
-const PlayerHand = jest.requireMock('../../dataTypes/player_hand.js', () => ({
+import fakeHands from './fake_mahjong_hands.js';
+import {jest} from '@jest/globals'
+// import PlayerHand from '../../dataTypes/player_hand.js';
+const PlayerHand = jest.requireMock('../../dataTypes/player_hand.js ', () => ({
   groupByType: jest.fn(),
 }));
 
 const mahjong_gaming = new MahjongTheGame([], 12);
 beforeEach(() => {
   PlayerHand.mockClear();
-  PlayerHand.groupByType = jest.fn(() => fakeHand);
+  // PlayerHand.groupByType = jest.fn(() => fakeHands.fakeHand);
 });
   
-  afterEach(() => {
+afterEach(() => {
 
-  });
+});
 
 // test('Open hand with one dragon and round and seat wind boosted east returns 3', () => {
 //     expect(mahjong_gaming.scoreHand(fakeHands.fakeOpenSet, 12, 12, false, true)).toBe(3);
@@ -27,7 +29,7 @@ beforeEach(() => {
 // });
 
 test('findSets returns a list of multiple sets', () => {
-  PlayerHand.groupByType.mockReturnValueOnce(fakeHand)
-  results = mahjong_gaming.findSets(fakeHand)
+  // PlayerHand.groupByType.mockReturnValueOnce(fakeHand)
+  results = mahjong_gaming.findSets(fakeHands.fakeHand)
   expect(results.length).toBe(7);
 });
