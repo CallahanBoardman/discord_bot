@@ -1,17 +1,15 @@
 class ReminderData {
-    constructor(date, users, message) {
-        this.date = date;
-        this.users = users;
-        this.message = message
-    }
-
-    toJSON() {
-        return {
-          ReminderDate: this.date,
-          UsersList:  this.users,
-          ReminderMessage:   this.message
-        };
-      }
+  constructor(date, users, message) {
+    this.date = date;
+    this.users = users;
+    this.message = message;
+  }
+  toJSON() {
+    return {
+      ReminderDate: this.date,
+      UsersList: this.users,
+      ReminderMessage: this.message
+    };
+  }
 }
-
-export default ReminderData
+module.exports = ReminderData;
