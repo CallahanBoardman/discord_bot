@@ -28,7 +28,11 @@ class MahjongTheGame {
       this.drawTile(this.players[i].hand, 13);
       this.sortHand(this.players[i].hand);
     }
+    this.drawTile(this.players[0].hand, 1)
+    this.sortHand(this.players[0].hand);
+    return this.players[0];
   }
+
   createDeadWall() {
     this.kanAmount = 0;
     this.doraTiles = this.drawPile.slice(0, 5);
@@ -36,7 +40,7 @@ class MahjongTheGame {
     this.kanTiles = this.drawPile.slice(0, 4);
   }
   drawTile(hand, amount) {
-    for (let i = 0; i <= amount; i++) {
+    for (let i = 0; i < amount; i++) {
       hand.tiles.push(this.drawPile.pop());
     }
   }
@@ -44,8 +48,6 @@ class MahjongTheGame {
     hand.tiles.sort((a, b) => this.tileOrder.indexOf(a.tileType) * 10 + a.value - (this.tileOrder.indexOf(b.tileType) * 10 + b.value));
   }
   discardTile(player, tileToDiscard) {
-    console.log(player.seatPosition);
-    console.log(this.whosTurn + 10);
     if (player.seatPosition !== this.whosTurn + 10) {
       return 'Its not your turn bub';
     }
@@ -54,7 +56,10 @@ class MahjongTheGame {
     }
     this.discardPile.push(player.hand.tiles.splice(tileToDiscard - 1, 1)[0]);
     this.whosTurn + 1 < this.players.length ? this.whosTurn += 1 : this.whosTurn = 0;
-    return player.hand.tiles;
+    let nextPlayer = this.players[this.whosTurn]
+    this.drawTile(nextPlayer.hand, 1);
+    this.sortHand(nextPlayer.hand);
+    return [nextPlayer.id, nextPlayer.hand.tiles];
   }
   performSteal(player) {
     const copiedHand = player.hand;

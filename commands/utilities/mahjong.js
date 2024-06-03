@@ -1,9 +1,11 @@
 const {
-	SlashCommandBuilder
+	SlashCommandBuilder,
+	AttachmentBuilder,
   } = require('discord.js');
   const {
 	gameMaker
   } = require('../../mahjong/game_maker.js');
+const Player = require('../../dataTypes/player.js');
 exports.data = new SlashCommandBuilder()
 	.setName('mahjong')
 	.setDescription('play mahjong with the boys.')
@@ -20,5 +22,13 @@ exports.execute = async function (interaction) {
 	const rounds = interaction.options.getNumber('rounds') ?? 1;
 	const userList = Array.from(users.matchAll("<@!?([0-9]{15,20})>")).map((reg) => reg[1]);
 
-	await interaction.reply(gameMaker.createGame(userList));
+	result = gameMaker.createGame(userList);
+	if(result.constructor === Player) {
+		attachment = await gameMaker.createBoardImage(result.hand.tiles);
+		await interaction.reply({
+		  files: [attachment]
+		});
+	  } else {
+		await interaction.reply(result);
+	  }
 }

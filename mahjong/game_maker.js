@@ -1,11 +1,21 @@
 const Player = require("../dataTypes/player.js");
 const PlayerHand = require("../dataTypes/player_hand.js");
 const MahjongTheGame = require("./mainjong.js");
+const {
+  createCanvas,
+  loadImage
+} = require('@napi-rs/canvas');
+const {
+  GlobalFonts
+} = require('@napi-rs/canvas');
+const {
+  AttachmentBuilder,
+} = require('discord.js');
 class GameMaker {
   constructor() {
     this.gamesDictionary = {};
   }
-  async createGame(playerIds) {
+  createGame(playerIds) {
     let playerList = [];
     console.log(playerIds)
     for (let i = 0; i < playerIds.length; i++) {
@@ -23,21 +33,13 @@ class GameMaker {
         return 'You can\'t have the same person twice silly goober'
       }
       playerList.push(new Player(new PlayerHand([]), null, playerIds[i], i + 10));
-      const user = await client.users.fetch(playerId[i]).catch(e => console.log(e));
-      if (!user) {
-        return 'Someone in there does not have a valid id';
-        continue;
-      }
-      await user.send(reminder.ReminderMessage).catch(() => {
-        return "User has DMs closed or has no mutual servers with the bot :(";
-      });
     }
     const aGameOfMahjong = new MahjongTheGame(playerList);
     for (let i = 0; i < playerIds.length; i++) {
       this.gamesDictionary[playerIds[i]] = aGameOfMahjong;
     }
-    aGameOfMahjong.gameSetup();
-    return 'Game Created';
+    
+    return aGameOfMahjong.gameSetup();
   }
   performDiscard(playerId, input) {
     let game = this.gamesDictionary[playerId];
@@ -59,6 +61,23 @@ class GameMaker {
       return game.performSteal(player);
     }
     return 'You\'re not in a game';
+  }
+
+  async createBoardImage (playerTiles) {
+    const canvas = createCanvas(1000, 1000);
+    const context = canvas.getContext('2d');
+    const background = await loadImage('./assets/board.png');
+    context.drawImage(background, 0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < playerTiles.length; i++) {
+      const tile = playerTiles[i];
+      const back = await loadImage('./assets/Front.png')
+      context.drawImage(back, 100+55*(i+1), 900, 50, 65);
+      const face = await loadImage(tile.imageValue);
+      context.drawImage(face, 100+55*(i+1), 900, 40, i+1*55);
+    }
+    return new AttachmentBuilder(await canvas.encode('png'), {
+      name: 'mahjong-board-image.png'
+    });
   }
 }
 let gameMaker = new GameMaker();
