@@ -82,30 +82,7 @@ client.on(Events.InteractionCreate, async interaction => {
   }
 });
 client.login(token);
-client.on('messageCreate', async msg => {
-  // You can view the msg object here with console.log(msg)
-  if (msg.content === 'Hello') {
-    const canvas = createCanvas(600, 800);
-    const context = canvas.getContext('2d');
-    const background = await loadImage(`./assets/Front.png`);
-    // Select the font size and type from one of the natively available fonts
-    context.font = '100px Comic Sans MS';
 
-    // Select the style that will be used to fill the text in
-    context.fillStyle = '#ffffff';
-    context.fillText('Fuck', 100, 100);
-    // This uses the canvas dimensions to stretch the image onto the entire canvas
-    context.drawImage(background, 0, 0, canvas.width, canvas.height);
-
-    // Use the helpful Attachment class structure to process the file for you
-    const attachment = new AttachmentBuilder(await canvas.encode('png'), {
-      name: 'profile-image.png'
-    });
-    msg.reply({
-      files: [attachment]
-    });
-  }
-});
 const schedule_rule = new RecurrenceRule();
 schedule_rule.minute = new Range(0, 59, 1);
 scheduleJob(schedule_rule, async () => {

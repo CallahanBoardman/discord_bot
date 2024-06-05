@@ -24,7 +24,14 @@ exports.execute = async function (interaction) {
 
 	result = gameMaker.createGame(userList);
 	if(result.constructor === Player) {
-		attachment = await gameMaker.createBoardImage(result.hand.tiles);
+		attachment = await gameMaker.createHandImage(result.hand.tiles);
+		const user = await interaction.client.users.fetch(result.id).catch(e => console.log(e));
+        if (!user) {
+          console.error('Invalid user');
+        }
+        await user.send({files: [attachment]}).catch((_) => {
+          console.error(_);
+        });
 		await interaction.reply({
 		  files: [attachment]
 		});
