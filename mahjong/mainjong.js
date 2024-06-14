@@ -54,7 +54,7 @@ class MahjongTheGame {
     if (tileToDiscard > 14 || tileToDiscard < 1) {
       return 'Thats not a valid tile silly!';
     }
-    this.discardPile.push(player.hand.tiles.splice(tileToDiscard - 1, 1));
+    this.discardPile.push(...player.hand.tiles.splice(tileToDiscard - 1, 1));
     this.whosTurn + 1 < this.players.length ? this.whosTurn += 1 : this.whosTurn = 0;
     let nextPlayer = this.players[this.whosTurn]
     this.drawTile(nextPlayer.hand, 1);

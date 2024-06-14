@@ -6,6 +6,7 @@ const {
 	gameMaker
   } = require('../../mahjong/game_maker.js');
 const Player = require('../../dataTypes/player.js');
+const { result } = require('lodash');
 exports.data = new SlashCommandBuilder()
 	.setName('mahjong')
 	.setDescription('play mahjong with the boys.')
@@ -22,9 +23,10 @@ exports.execute = async function (interaction) {
 	const rounds = interaction.options.getNumber('rounds') ?? 1;
 	const userList = Array.from(users.matchAll("<@!?([0-9]{15,20})>")).map((reg) => reg[1]);
 
-	result = gameMaker.createGame(userList);
+	const result = gameMaker.createGame(userList);
 	if(result.constructor === Player) {
 		attachment = await gameMaker.createHandImage(result.hand.tiles);
+		attachment2 = await gameMaker.createBoardImage(result.id);
 		const user = await interaction.client.users.fetch(result.id).catch(e => console.log(e));
         if (!user) {
           console.error('Invalid user');
@@ -33,7 +35,7 @@ exports.execute = async function (interaction) {
           console.error(_);
         });
 		await interaction.reply({
-		  files: [attachment]
+		  files: [attachment2]
 		});
 	  } else {
 		await interaction.reply(result);

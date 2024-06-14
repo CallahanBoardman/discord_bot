@@ -101,6 +101,57 @@ class GameMaker {
       name: 'mahjong-board-image.png'
     });
   }
+
+  async createBoardImage (playerId) {
+    let game = this.gamesDictionary[playerId];
+    let discardPile = game.discardPile;
+    const canvas = createCanvas(1000, 1000);
+    const context = canvas.getContext('2d');
+    context.fillStyle = '#d22b28';
+    context.strokeStyle ='#ffffff';
+    const background = await loadImage('./assets/board.png');
+    context.drawImage(background, 0, 0, canvas.width, canvas.height);
+    let seatPositionCounter = 1;
+    let rowPositionCounter = 1;
+    for (let i = 0; i < discardPile.length; i++) {
+      const tile = discardPile[i];
+      const back = await loadImage('./assets/Front.png')
+      const face = await loadImage(tile.imageValue);
+      switch (seatPositionCounter) {
+        case 1:
+          context.drawImage(back, 110*(rowPositionCounter), 900, 100, 120);
+          context.drawImage(face, 110*(rowPositionCounter), 900, 100, 120);
+          break;
+        case 2:
+          context.rotate(90);
+          context.drawImage(back, 100, 110*(rowPositionCounter), 100, 120);
+          context.drawImage(face, 100, 110*(rowPositionCounter), 100, 120);
+        case 3:
+          context.rotate(180);
+          context.drawImage(back, 110*(rowPositionCounter), 100, 100, 120);
+          context.drawImage(face, 110*(rowPositionCounter), 100, 100, 120);
+        case 4:
+          context.rotate(270);
+          context.drawImage(back, 900, 110*(rowPositionCounter), 100, 120);
+          context.drawImage(face, 900, 110*(rowPositionCounter), 100, 120);
+        default:
+          break;
+      }
+      if(seatPositionCounter === 4) {
+        seatPositionCounter = 1;
+        if(rowPositionCounter === 7) {
+          rowPositionCounter = 1
+        } else {
+          rowPositionCounter +=1
+        }
+      } else {
+        seatPositionCounter +=1
+      }
+    }
+    return new AttachmentBuilder(await canvas.encode('png'), {
+      name: 'mahjong-board-image.png'
+    });
+  }
 }
 let gameMaker = new GameMaker();
 const _gameMaker = gameMaker;
