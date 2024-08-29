@@ -4,6 +4,8 @@ class Player {
     this.previousDiscardedTile = previousDiscardedTile;
     this.id = id;
     this.seatPosition = seatPosition;
+    this.RiichiDeclared = false;
+    this.RiichiCalledAt = 999;
   }
 }
 module.exports = Player;

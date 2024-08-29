@@ -9,13 +9,24 @@ const {
 } = require('undici');
 exports.data = new SlashCommandBuilder().setName('discard').setDescription('For Mahjong use only.').addNumberOption(option => option.setName('tiletodiscard').setDescription('Enter a number from 1-13, that tile will be discarded').setRequired(true));
 exports.execute = async function (interaction) {
-  const user = interaction.user.id.toString();
+  const inputUser = interaction.user.id.toString();
   const tileToDiscard = interaction.options.getNumber('tiletodiscard') ?? 1;
-  let result = gameMaker.performDiscard(user, tileToDiscard);
+  let result = gameMaker.performDiscard(inputUser, tileToDiscard);
+  await interaction.deferReply({ ephemeral: true });
   if(result.constructor === Array) {
     const [playerID, playerTiles] = result;
 		attachment = await gameMaker.createHandImage(playerTiles);
 		attachment2 = await gameMaker.createBoardImage(playerID);
+    let game = gameMaker.gamesDictionary[playerID];
+    for (let i = 0; i < game.players.length; i++) {
+      const user = await interaction.client.users.fetch(game.players[i].id).catch(e => console.log(e));
+      if (!user) {
+        console.error('Invalid user');
+      }
+      await user.send({files: [attachment2]}).catch((_) => {
+        console.error(_);
+      });
+    }
     const user = await interaction.client.users.fetch(playerID).catch(e => console.log(e));
     if (!user) {
       console.error('Invalid user');
@@ -23,10 +34,8 @@ exports.execute = async function (interaction) {
     await user.send({files: [attachment]}).catch((_) => {
       console.error(_);
     });
-    await interaction.reply({
-      files: [attachment2]
-    });
+    interaction.editReply(`Discarded tile ${tileToDiscard}`);
   } else {
-    await interaction.reply(result);
+    interaction.editReply(result);
   }
 };

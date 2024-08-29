@@ -43,6 +43,7 @@ class GameMaker {
       if(this.gamesDictionary[playerIds[i]]){
         return 'Someone there is already in a game';
       }
+
       const player = playerList.filter(obj => {
         return obj.id === playerIds[i];
       });
@@ -59,6 +60,7 @@ class GameMaker {
     
     return aGameOfMahjong.gameSetup();
   }
+
   performDiscard(playerId, input) {
     let game = this.gamesDictionary[playerId];
     if (game) {
@@ -69,18 +71,112 @@ class GameMaker {
     }
     return 'You\'re not in a game';
   }
-  performSteal(playerId, commandType, input) {
+
+  performSteal(playerId) {
     let game = this.gamesDictionary[playerId];
-    if (!game) {
+    if (game) {
       const player = game.players.filter(obj => {
         return obj.id === playerId;
       });
-      return game.performSteal(player);
+      return game.performSteal(...player);
     }
     return 'You\'re not in a game';
   }
 
-  async createHandImage (playerTiles) {
+  performKan(playerId) {
+    let game = this.gamesDictionary[playerId];
+    if (game) {
+      const player = game.players.filter(obj => {
+        return obj.id === playerId;
+      });
+      return game.performKan(...player.hand);
+    }
+    return 'You\'re not in a game';
+  }
+
+  performRiichi(playerId) {
+    let game = this.gamesDictionary[playerId];
+    if (game) {
+      const player = game.players.filter(obj => {
+        return obj.id === playerId;
+      });
+      return game.performSteal(...player);
+    }
+    return 'You\'re not in a game';
+  }
+
+  performTsumo(playerId) {
+    let game = this.gamesDictionary[playerId];
+    if (game) {
+      const player = game.players.filter(obj => {
+        return obj.id === playerId;
+      });
+      return game.performTsumo(...player);
+    }
+    return 'You\'re not in a game';
+  }
+
+  async createHandImage (playerHand) {
+    let playerTiles = playerHand.tiles;
+    let playerOpenTiles = playerHand.openHand;
+
+    const canvas = createCanvas(1750, 400);
+    const context = canvas.getContext('2d');
+    context.fillStyle = '#d22b28';
+    context.strokeStyle ='#ffffff';
+    const background = await loadImage('./assets/board.png');
+    context.drawImage(background, 0, 0, canvas.width, canvas.height);
+    let position;
+    for (position = 0; position < playerTiles.length; position++) {
+      const tile = playerTiles[position];
+      const back = await loadImage('./assets/Front.png')
+      context.drawImage(back, 110*(position+1), 100, 100, 120);
+      const face = await loadImage(tile.imageValue);
+      context.drawImage(face, 110*(position+1), 100, 100, 120);
+      context.font = applyText(canvas, `${position+1}`);
+      context.fillText(`${position+1}`, position > 9 ? 20+110*(position+1) : 30+110*(position+1), 300);
+      context.strokeText(`${position+1}`, position > 9 ? 20+110*(position+1) : 30+110*(position+1), 300);
+    }
+
+    if(playerOpenTiles.length > 0) {
+      context.font = applyText(canvas, `Open tiles`);
+      context.fillText(`Open tiles`, position > 9 ? 20+110*(position+1) : 30+110*(position+1), 300);
+      context.strokeText(`Open tiles`, position > 9 ? 20+110*(position+1) : 30+110*(position+1), 300);
+      for (let i = 0;i < playerOpenTiles.length; i) {
+        const tileSet = playerOpenTiles[i];
+        if(tileSet.length === 3) {
+          const back1 = await loadImage('./assets/Front.png')
+          context.drawImage(back1, 110*(position+1), 100, 100, 120);
+          const face1 = await loadImage(tile.image1);
+          context.drawImage(face1, 110*(position+1), 100, 100, 120);
+          position++;
+          const back2 = await loadImage('./assets/Front.png')
+          context.drawImage(back2, 110*(position+1), 100, 100, 120);
+          const face2 = await loadImage(tile.imag2);
+          context.drawImage(face2, 110*(position+1), 100, 100, 120);
+          position++;
+          const back3 = await loadImage('./assets/Front.png')
+          context.drawImage(back3, 110*(position+1), 100, 100, 120);
+          const face3 = await loadImage(tile.image3);
+          context.drawImage(face3, 110*(position+1), 100, 100, 120);
+          position++
+        } else {
+          for (let index = 0; index < tileSet.length; index++) {
+            const back1 = await loadImage('./assets/Front.png')
+            context.drawImage(back1, 110*(position+1), 100, 100, 120);
+            const face1 = await loadImage(tile.image1);
+            context.drawImage(face1, 110*(position+1), 100, 100, 120);
+            position++;
+          }
+        }
+      }
+    }
+    return new AttachmentBuilder(await canvas.encode('png'), {
+      name: 'player-hand.png'
+    });
+  }
+
+  async createNotTheTurnHandImage (playerTiles) {
     const canvas = createCanvas(1750, 400);
     const context = canvas.getContext('2d');
     context.fillStyle = '#d22b28';
@@ -93,12 +189,12 @@ class GameMaker {
       context.drawImage(back, 110*(i+1), 100, 100, 120);
       const face = await loadImage(tile.imageValue);
       context.drawImage(face, 110*(i+1), 100, 100, 120);
-      context.font = applyText(canvas, `${i+1}`);
-      context.fillText(`${i+1}`, i > 9 ? 20+110*(i+1) : 30+110*(i+1), 300);
-      context.strokeText(`${i+1}`, i > 9 ? 20+110*(i+1) : 30+110*(i+1), 300);
     }
+    context.font = applyText(canvas, `It is not your turn, this is just what your hand is ok bye`);
+      context.fillText(`It is not your turn, this is just what your hand is ok bye`, 20+110, 300);
+      context.strokeText(`It is not your turn, this is just what your hand is ok bye`, 20+110, 300);
     return new AttachmentBuilder(await canvas.encode('png'), {
-      name: 'mahjong-board-image.png'
+      name: 'player-display-hand.png'
     });
   }
 

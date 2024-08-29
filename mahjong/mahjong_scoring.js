@@ -19,7 +19,8 @@ class MahjongScoring {
     }
     return possibleHands;
   }
-  scoreHand(hand, seatWind, roundWind, isRiichi, isRon) {
+
+  scoreHand(hand, seatWind, roundWind, isRiichi, isRon, Ippatsu) {
     let score = 0;
     const maxValue = 13;
     if (!isRon) {
@@ -37,7 +38,9 @@ class MahjongScoring {
     }
     if (isRiichi) {
       score += 1;
-      //insert logic for winning after one turn of declaring here
+      if(Ippatsu) {
+        score+=1;
+      }
     }
 
     let openCount = 0;
@@ -56,6 +59,11 @@ class MahjongScoring {
     let poType = '';
     for (let index = 0; index < hand.length; index++) {
       const set = hand[index];
+      score += set.doraCount;
+      if (isRiichi) {
+        score += 1;
+        score += set.uradoraCount;
+      }
       if (set.length > 2) {
         if (set.isOpenTile) {
           openCount++;
@@ -97,7 +105,7 @@ class MahjongScoring {
         if (set.isTerminal) {
           terminalCount++;
         }
-        if (set.isDoraTile) {
+        if (set.isRedDoraTile) {
           score += 1;
         }
         previousStartingValue = set.startingValue;
@@ -196,14 +204,16 @@ class MahjongScoring {
     }
     return score;
   }
+  
   determineHighestScore(scoreList) {
     return Math.max(...scoreList);
   }
-  calculateHandValue(comboMap, seatWind, isRiichi, isRon) {
+
+  calculateHandValue(comboMap, seatWind, isRiichi, isRon, Ippatsu) {
     const scoreList = [];
     const hands = this.handMaker(comboMap);
     for (const hand of hands) {
-      scoreList.push(this.scoreHand(hand, seatWind, isRiichi, isRon));
+      scoreList.push(this.scoreHand(hand, seatWind, isRiichi, isRon, Ippatsu));
     }
     console.log(this.determineHighestScore(scoreList));
     return this.determineHighestScore(scoreList);

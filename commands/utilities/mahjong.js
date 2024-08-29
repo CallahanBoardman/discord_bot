@@ -24,19 +24,32 @@ exports.execute = async function (interaction) {
 	const userList = Array.from(users.matchAll("<@!?([0-9]{15,20})>")).map((reg) => reg[1]);
 
 	const result = gameMaker.createGame(userList);
-	if(result.constructor === Player) {
-		attachment = await gameMaker.createHandImage(result.hand.tiles);
-		attachment2 = await gameMaker.createBoardImage(result.id);
-		const user = await interaction.client.users.fetch(result.id).catch(e => console.log(e));
-        if (!user) {
-          console.error('Invalid user');
-        }
-        await user.send({files: [attachment]}).catch((_) => {
-          console.error(_);
-        });
-		await interaction.reply({
-		  files: [attachment2]
-		});
+	if(result.constructor === Array) {
+		let userString = "";
+        let whosTurnString = "";
+		for (let i = 0; i < userList.length; i++) {
+			
+			const listUser = await interaction.client.users.fetch(userList[i]).catch(e => console.log(e));
+			userString += `${i + 1 < userList.length ? '' : 'and '}${listUser.displayName}${i + 1 < userList.length ? i + 2 < userList.length ? ', ' : ' ' : '.'}`;
+			if(i === 0) {
+				whosTurnString = listUser.displayName
+			}
+		}
+		for (let i = 0; i < userList.length; i++) {
+			attachment = i === 0 ? await gameMaker.createHandImage(result[i].hand) : await gameMaker.createNotTheTurnHandImage(result[i].hand.tiles);
+			const listedUser = await interaction.client.users.fetch(userList[i]).catch(e => console.log(e));
+			if (!listedUser) {
+				console.error('Invalid user');
+			}
+			await listedUser.send(`You are now in a Mahjong game with ${userString} do not resist. \nIt is ${whosTurnString}'s turn.`).catch((_) => {
+				console.error(_);
+			});
+			await listedUser.send({files: [attachment]}).catch((_) => {
+				console.error(_);
+			  });
+		}
+		
+		await interaction.reply("Mahjong has been activated");
 	  } else {
 		await interaction.reply(result);
 	  }
