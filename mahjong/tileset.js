@@ -2,6 +2,12 @@ const MahjongTile = require('../dataTypes/mahjong_tile.js');
 const TileTypes = require('../dataTypes/tile_types.js');
 function generateTileset() {
   const tileList = [];
+  //for test purposes only
+  // for (let i = 0; i < 100; i++) {
+  //   tileList.push(new MahjongTile(TileTypes.Dragon, 14, `./assets/Red.png`, true));
+  // }
+  // return tileList;
+
   for (let i = 0; i < 3; i++) {
     for (let value = 1; value < 9; value++) {
       if (i === 0 && value === 5) {

@@ -22,8 +22,15 @@ exports.execute = async function (interaction) {
 	const users = interaction.options.getString('users');
 	const rounds = interaction.options.getNumber('rounds') ?? 1;
 	const userList = Array.from(users.matchAll("<@!?([0-9]{15,20})>")).map((reg) => reg[1]);
+	const imageList = []
+	await interaction.deferReply({ ephemeral: true });
 
-	const result = gameMaker.createGame(userList);
+	for (let i = 0; i < userList.length; i++) {
+		const user = await interaction.client.users.fetch(userList[i]).catch(e => console.log(e));
+		imageList.push(user.displayAvatarURL({ extension: 'jpg' }));
+		
+	}
+	const result = gameMaker.createGame(userList, imageList);
 	if(result.constructor === Array) {
 		let userString = "";
         let whosTurnString = "";
@@ -49,8 +56,8 @@ exports.execute = async function (interaction) {
 			  });
 		}
 		
-		await interaction.reply("Mahjong has been activated");
+		interaction.editReply("Mahjong has been activated");
 	  } else {
-		await interaction.reply(result);
+		interaction.editReply(result);
 	  }
 }

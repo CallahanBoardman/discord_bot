@@ -215,7 +215,6 @@ class MahjongScoring {
     for (const hand of hands) {
       scoreList.push(this.scoreHand(hand, seatWind, isRiichi, isRon, Ippatsu));
     }
-    console.log(this.determineHighestScore(scoreList));
     return this.determineHighestScore(scoreList);
     ;
   }

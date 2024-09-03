@@ -19,6 +19,7 @@ class MahjongTheGame {
     this.kanAmount = 0;
     this.tileOrder = Object.values(TileTypes);
     this.whosTurn = 0;
+    this.drawNumber= 0;
     this.mahjongScoring = new MahjongScoring(this.drawPile, this.roundWind);
   }
   gameSetup() {
@@ -39,11 +40,15 @@ class MahjongTheGame {
     this.uraDoraTiles = this.drawPile.slice(0, 5);
     this.kanTiles = this.drawPile.slice(0, 4);
   }
+
   drawTile(hand, amount) {
     for (let i = 0; i < amount; i++) {
+      this.drawNumber++
+      this.drawPile[this.drawPile.length - 1].hasBeenDrawn(this.drawNumber);
       hand.tiles.push(this.drawPile.pop());
     }
   }
+
   checkDoraTiles(tile) {
     this.doraTiles.forEach(doraTile => {
       if (tile.value === doraTile.value && tile.tileType === doraTile.tileType) {
@@ -68,12 +73,13 @@ class MahjongTheGame {
     if (tileToDiscard > 14 || tileToDiscard < 1) {
       return 'Thats not a valid tile silly!';
     }
+    player.hand.tiles[tileToDiscard - 1].hasBeenDiscarded(this.whosTurn);
     this.discardPile.push(...player.hand.tiles.splice(tileToDiscard - 1, 1));
     this.whosTurn + 1 < this.players.length ? this.whosTurn += 1 : this.whosTurn = 0;
     let nextPlayer = this.players[this.whosTurn]
     this.drawTile(nextPlayer.hand, 1);
     this.sortHand(nextPlayer.hand);
-    return [nextPlayer.id, nextPlayer.hand];
+    return [nextPlayer.id, nextPlayer.hand, player.seatPosition];
   }
 
   performSteal(player) {
@@ -88,30 +94,29 @@ class MahjongTheGame {
     if(kanResult) {
       hand.tiles.push(this.kanTiles.pop());
       this.addToOpenHand(player.hand, kanResult);
-      this.whosTurn = player.seatPosition - 10 < this.players.length ? this.whosTurn +=  player.seatPosition - 10 : this.whosTurn = 0;
+      this.whosTurn = player.seatPosition - 10;
       return 'Valid Quadruplet Steal'
     }
     //make this check if its won, then we make Ron, ez
     const results = this.findSets(copiedHand);
+    
+    let isRon = this.performRon(results, player);
     const setList = results.get(discardedTile.tileType);
+
       for (let i = 0; i < setList.length; i++) {
         const hand = setList[i];
         for (let i = 0; i < hand.length - 1; i++) {
-          console.log(hand[i].startingValue);
-          console.log(hand[i].tileType);
-          console.log(hand[i].isOpenTile);
-          console.log(discardedTile.value);
-          console.log(discardedTile.tileType);
-          console.log(!hand[i].isOpenTile);
-
           if(hand[i].tileType === discardedTile.tileType && !hand[i].isOpenTile)
           
             if (hand[i].startingValue === discardedTile.value || hand[i].startingValue + 1 === discardedTile.value || hand[i].startingValue + 2 === discardedTile.value) {
               this.discardPile.pop();
               this.addToOpenHand(player.hand, hand[i]);
-              this.whosTurn = player.seatPosition - 10 < this.players.length ? this.whosTurn +=  player.seatPosition - 10 : this.whosTurn = 0;
-              console.log(player.hand)
-              return player.hand;
+              if(Number.isInteger(isRon)) {
+                return isRon;
+              }
+              this.whosTurn = player.seatPosition - 10;
+              let nextPlayer = player;
+              return [nextPlayer.id, nextPlayer.hand];
             }
         }
   };
@@ -120,30 +125,34 @@ class MahjongTheGame {
   }
 
   addToOpenHand(hand, openSet) {
-    let tilesToRemove = [];
+    const tilesToRemove = [];
     if(openSet.isSequence) {
       for (let i = 0; i < 3; i++) {
-        tilesToRemove.push([openSet.value + i, openSet.tileType])
+        tilesToRemove.push([openSet.startingValue + i, openSet.tileType])
       }
     } else {
       for (let i = 0; i < openSet.length; i++) {
-        tilesToRemove.push([openSet.value, openSet.tileType])
+        tilesToRemove.push([openSet.startingValue, openSet.tileType])
       }
     }
+
     hand.tiles = hand.tiles.filter(function(tile) { 
       for (let i = 0; i < tilesToRemove.length; i++) {
         const tileDataPair = tilesToRemove[i];
         if(tile.value == tileDataPair[0] && tile.tileType == tileDataPair[1]) {
-          tilesToRemove.split(i, 1);
-          return true;
+          tilesToRemove.slice(i, 1);
+          return false;
         }
-        return false;
       }
+      return true;
     });
     
     hand.openHand.push(openSet);
   }
 
+  discardMostRecentTile() {
+
+  }
   performKan(hand, isForStealing) {
     this.sortHand(hand);
     let winningTile;
@@ -165,7 +174,19 @@ class MahjongTheGame {
     return false;
   }
 
-  performRon() { }
+  performRon(results, player) { 
+    if (results.size > 0) {
+      const score = this.mahjongScoring.calculateHandValue(results, player.openHand, true, false, player.RiichiCalledAt - this.drawPile.length === 4);
+      if (score === 0) {
+        return 'Your hand is complete, however it has zero value. Refer to the mahjong handbook with !scoring to see where you messed up';
+      }
+      //TODO if we ever attempt to implement multiple rounds, not part of current scope
+      // player.RiichiDeclared = false
+      // player.RiichiCalledAt = 999
+      return score;
+    }
+    return 'Your hand is bogus';
+  }
 
   checkForFancyHands(hand) {
     const greenTiles = [2, 3, 4, 6, 8, 15];
@@ -185,9 +206,10 @@ class MahjongTheGame {
       if (score === 0) {
         return 'Your hand is complete, however it has zero value. Refer to the mahjong handbook with !scoring to see where you messed up';
       }
-      player.RiichiDeclared = false
-      player.RiichiCalledAt = 999
-      return `Victory! your hand is worth: ${score} points!`;
+      //TODO if we ever attempt to implement multiple rounds, not part of current scope
+      // player.RiichiDeclared = false
+      // player.RiichiCalledAt = 999
+      return score;
     }
     return 'Your hand is bogus';
   }
@@ -320,18 +342,4 @@ class MahjongTheGame {
     return results;
   }
 }
-module.exports = MahjongTheGame; // testMahjong.gameSetup();
-// console.log(player4.hand);
-// testMahjong.discardTile(player4.hand, 5);
-// console.log(player1.hand);
-// console.log(player2.hand);
-// console.log(player3.hand);
-// console.log(player4.hand.tiles);
-// testMahjong.findSets(player4.hand);
-// console.log(testMahjong.discardPile);
-// let player1 = new Player(new PlayerHand([]), null, 1);
-// let player2 = new Player(new PlayerHand([]), null, 2);
-// let player3 = new Player(new PlayerHand([]), null, 3);
-let player4 = new Player(new PlayerHand(fakeHands.fakeHand), null, 4);
-const testMahjong = new MahjongTheGame([player4], 12);
-testMahjong.performTsumo(player4, []);
+module.exports = MahjongTheGame;

@@ -7,6 +7,14 @@ class MahjongTile {
     this.isHonorTile = honorTile ?? false;
     this.isRedDoraTile = isRedDoraTile ?? false; // exclusively for the red dora tiles
     this.isGreenTile = isGreenTile ?? false; // exclusively for one hand involving tiles that are entirely green
+    this.discardedByWhom = 50;
+    this.drawnWhen = 0;
+  }
+  hasBeenDiscarded(whom){
+    this.discardedByWhom = whom;
+  }
+  hasBeenDrawn(when){
+    this.drawnWhen = when;
   }
 }
 module.exports = MahjongTile;

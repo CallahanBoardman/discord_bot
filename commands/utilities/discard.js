@@ -14,15 +14,16 @@ exports.execute = async function (interaction) {
   let result = gameMaker.performDiscard(inputUser, tileToDiscard);
   await interaction.deferReply({ ephemeral: true });
   if(result.constructor === Array) {
-    const [playerID, playerTiles] = result;
-		attachment = await gameMaker.createHandImage(playerTiles);
-		attachment2 = await gameMaker.createBoardImage(playerID);
+    const [playerID, playerTiles, seatPosition] = result;
+    console.log(seatPosition)
+		let attachment = await gameMaker.createHandImage(playerTiles);
     let game = gameMaker.gamesDictionary[playerID];
     for (let i = 0; i < game.players.length; i++) {
       const user = await interaction.client.users.fetch(game.players[i].id).catch(e => console.log(e));
       if (!user) {
         console.error('Invalid user');
       }
+		  let attachment2 = await gameMaker.createBoardImage(game.players[i].id, game.players[i].seatPosition);
       await user.send({files: [attachment2]}).catch((_) => {
         console.error(_);
       });
