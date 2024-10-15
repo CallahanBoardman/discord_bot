@@ -10,9 +10,11 @@ class MahjongTile {
     this.discardedByWhom = 50;
     this.drawnWhen = 0;
   }
+
   hasBeenDiscarded(whom){
     this.discardedByWhom = whom;
   }
+  
   hasBeenDrawn(when){
     this.drawnWhen = when;
   }

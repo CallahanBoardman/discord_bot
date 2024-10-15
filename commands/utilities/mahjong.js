@@ -5,6 +5,12 @@ const {
   const {
 	gameMaker
   } = require('../../mahjong/game_maker.js');
+const {
+	gameHandler
+  } = require('../../mahjong/game_handler.js');
+  const {
+	buttonConstructor
+  } = require('../../button_builder.js');
 const Player = require('../../dataTypes/player.js');
 const { result } = require('lodash');
 exports.data = new SlashCommandBuilder()
@@ -30,7 +36,7 @@ exports.execute = async function (interaction) {
 		imageList.push(user.displayAvatarURL({ extension: 'jpg' }));
 		
 	}
-	const result = gameMaker.createGame(userList, imageList);
+	const result = gameHandler.createGame(userList, imageList);
 	if(result.constructor === Array) {
 		let userString = "";
         let whosTurnString = "";
@@ -48,16 +54,20 @@ exports.execute = async function (interaction) {
 			if (!listedUser) {
 				console.error('Invalid user');
 			}
-			await listedUser.send(`You are now in a Mahjong game with ${userString} do not resist. \nIt is ${whosTurnString}'s turn.`).catch((_) => {
+			
+			if (i === 0) {
+			  const message = await listedUser.send({files: [attachment], components: [buttonConstructor.createButtonRow()]}).catch((_) => {
 				console.error(_);
-			});
-			await listedUser.send({files: [attachment]}).catch((_) => {
-				console.error(_);
-			  });
+			  })
+			interaction.editReply("Mahjong has been activated");
+			await buttonConstructor.assignCollector(userList[i], message)
+			} else {
+				await listedUser.send(`You are now in a Mahjong game with ${userString} do not resist. \nIt is ${whosTurnString}'s turn.`).catch((_) => {
+					console.error(_);
+				});
+			}
 		}
-		
-		interaction.editReply("Mahjong has been activated");
-	  } else {
+		} else {
 		interaction.editReply(result);
 	  }
 }

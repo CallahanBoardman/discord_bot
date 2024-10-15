@@ -1,9 +1,17 @@
 const {
   SlashCommandBuilder,
+  ActionRowBuilder,
+  ButtonStyle,
 } = require('discord.js');
 const {
   gameMaker
 } = require('../../mahjong/game_maker.js');
+const {
+  gameHandler
+} = require('../../mahjong/game_handler.js');
+const {
+  buttonConstructor
+} = require('../../button_builder.js');
 const {
   request
 } = require('undici');
@@ -11,13 +19,13 @@ exports.data = new SlashCommandBuilder().setName('discard').setDescription('For 
 exports.execute = async function (interaction) {
   const inputUser = interaction.user.id.toString();
   const tileToDiscard = interaction.options.getNumber('tiletodiscard') ?? 1;
-  let result = gameMaker.performDiscard(inputUser, tileToDiscard);
+  let result = gameHandler.performDiscard(inputUser, tileToDiscard);
   await interaction.deferReply({ ephemeral: true });
   if(result.constructor === Array) {
     const [playerID, playerTiles, seatPosition] = result;
     console.log(seatPosition)
 		let attachment = await gameMaker.createHandImage(playerTiles);
-    let game = gameMaker.gamesDictionary[playerID];
+    let game = gameHandler.gamesDictionary[playerID];
     for (let i = 0; i < game.players.length; i++) {
       const user = await interaction.client.users.fetch(game.players[i].id).catch(e => console.log(e));
       if (!user) {
@@ -32,10 +40,13 @@ exports.execute = async function (interaction) {
     if (!user) {
       console.error('Invalid user');
     }
-    await user.send({files: [attachment]}).catch((_) => {
+
+    const message = await user.send({files: [attachment], components: [buttonConstructor.createButtonRow()]}).catch((_) => {
       console.error(_);
-    });
+    })
+
     interaction.editReply(`Discarded tile ${tileToDiscard}`);
+    await buttonConstructor.assignCollector(inputUser, message)
   } else {
     interaction.editReply(result);
   }

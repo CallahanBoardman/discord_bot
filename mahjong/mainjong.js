@@ -20,16 +20,16 @@ class MahjongTheGame {
     this.tileOrder = Object.values(TileTypes);
     this.whosTurn = 0;
     this.drawNumber= 0;
+    this.discardNumber = 0;
     this.mahjongScoring = new MahjongScoring(this.drawPile, this.roundWind);
   }
   gameSetup() {
     this.drawPile = generateTileset().sort((a, b) => 0.5 - Math.random());
     this.createDeadWall();
     for (let i = 0; i < this.players.length; i++) {
-      this.drawTile(this.players[i].hand, 13);
+      this.drawTile(this.players[i], 13);
       this.sortHand(this.players[i].hand);
     }
-    this.drawTile(this.players[0].hand, 1)
     this.sortHand(this.players[0].hand);
     return this.players;
   }
@@ -41,12 +41,19 @@ class MahjongTheGame {
     this.kanTiles = this.drawPile.slice(0, 4);
   }
 
-  drawTile(hand, amount) {
+  drawTile(player, amount) {
+    if(player.seatPosition !== this.whosTurn + 10) {
+      return "You can't draw on someone else's turn";
+    }
+    if(player.hand.tiles.length > 13) {
+      return "nuh uh, your hand is too big";
+    }
     for (let i = 0; i < amount; i++) {
       this.drawNumber++
       this.drawPile[this.drawPile.length - 1].hasBeenDrawn(this.drawNumber);
-      hand.tiles.push(this.drawPile.pop());
+      player.hand.tiles.push(this.drawPile.pop());
     }
+    return player.hand;
   }
 
   checkDoraTiles(tile) {
@@ -56,6 +63,7 @@ class MahjongTheGame {
       }
     });
   }
+
   checkUraDoraTiles(tile) {
     this.uraDoraTiles.forEach(uraDoraTile => {
       if (tile.value === uraDoraTile.value && tile.tileType === uraDoraTile.tileType) {
@@ -63,22 +71,27 @@ class MahjongTheGame {
       }
     });
   }
+
   sortHand(hand) {
     hand.tiles.sort((a, b) => this.tileOrder.indexOf(a.tileType) * 10 + a.value - (this.tileOrder.indexOf(b.tileType) * 10 + b.value));
   }
+  
   discardTile(player, tileToDiscard) {
     if (player.seatPosition !== this.whosTurn + 10) {
       return 'Its not your turn bub';
     }
-    if (tileToDiscard > 14 || tileToDiscard < 1) {
+    if(this.discardNumber === this.drawNumber) {
+      return 'Draw another tile first dum dum.'
+    }
+    if (tileToDiscard > player.hand.tiles.length || tileToDiscard < 1) {
       return 'Thats not a valid tile silly!';
     }
     player.hand.tiles[tileToDiscard - 1].hasBeenDiscarded(this.whosTurn);
     this.discardPile.push(...player.hand.tiles.splice(tileToDiscard - 1, 1));
     this.whosTurn + 1 < this.players.length ? this.whosTurn += 1 : this.whosTurn = 0;
     let nextPlayer = this.players[this.whosTurn]
-    this.drawTile(nextPlayer.hand, 1);
     this.sortHand(nextPlayer.hand);
+    this.discardNumber = this.drawNumber;
     return [nextPlayer.id, nextPlayer.hand, player.seatPosition];
   }
 
@@ -87,6 +100,10 @@ class MahjongTheGame {
     const discardedTile = this.discardPile[this.discardPile.length - 1];
     if (!discardedTile) {
       return 'Theres nothing to steal!';
+    }
+
+    if(this.discardNumber != this.drawNumber) {
+      return 'Too slow! someone has drawn a tile already.'
     }
     copiedHand.tiles.push(discardedTile);
     this.sortHand(copiedHand);
@@ -116,10 +133,11 @@ class MahjongTheGame {
               }
               this.whosTurn = player.seatPosition - 10;
               let nextPlayer = player;
+              this.discardNumber = 0;
               return [nextPlayer.id, nextPlayer.hand];
             }
         }
-  };
+    };
 
     return 'You cannot steal that.';
   }
@@ -150,9 +168,6 @@ class MahjongTheGame {
     hand.openHand.push(openSet);
   }
 
-  discardMostRecentTile() {
-
-  }
   performKan(hand, isForStealing) {
     this.sortHand(hand);
     let winningTile;
@@ -213,6 +228,7 @@ class MahjongTheGame {
     }
     return 'Your hand is bogus';
   }
+
   isValidHand(comboMap) {
     let invalidCount = 0;
     let poCount = 0;
@@ -235,6 +251,7 @@ class MahjongTheGame {
       //do the hand creation function here
     }
   }
+
   isValidSequence(tile1, tile2, tile3) {
     if (tile1.value + 1 === tile2.value) {
       if (tile2.value + 1 === tile3.value) {
@@ -243,12 +260,14 @@ class MahjongTheGame {
     }
     return false;
   }
+
   isValidDouble(tile1, tile2) {
     if (tile1.value === tile2.value) {
       return true;
     }
     return false;
   }
+
   isValidTriplet(tile1, tile2, tile3) {
     if (tile1.value === tile2.value) {
       if (tile2.value === tile3.value) {
@@ -257,6 +276,7 @@ class MahjongTheGame {
     }
     return false;
   }
+  
   isValidQuadruplet(tile1, tile2, tile3, tile4) {
     if (tile1.value === tile2.value && tile1.tileType == tile2.tileType) {
       if (tile2.value === tile3.value && tile2.tileType == tile3.tileType) {
